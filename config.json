@@ -1,0 +1,22 @@
+{
+  "aws": {
+    "enabled": true,
+    "regions": {
+    },
+    "auth": {
+      "type": "profile",
+      "profile names": [
+        "profile name"
+      ]
+    }
+  },
+  "consul": {
+    "enabled": false,
+    "type": "acl",
+    "token": ""
+  },
+  "logging": {
+    "level": "INFO",
+    "path": "temp.log"
+  }
+}
