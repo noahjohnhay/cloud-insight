@@ -4,21 +4,19 @@ import logging
 import settings
 
 
-def ecs_list_regions(aws_auth_type, *aws_profile_name):
-    if aws_auth_type == 'profile':
-        session = boto3.Session(
-            profile_name=aws_profile_name
-        )
-        client = session.client('ecs')
-        all_regions = [region['RegionName'] for region in client.describe_regions()['Regions']]
-    else:
-        client = boto3.client('ecs')
-        all_regions = [region['RegionName'] for region in client.describe_regions()['Regions']]
+def ecs_list_regions():
+    session = boto3.Session()
+    all_regions = session.get_available_regions(
+        'ecs'
+    )
     return all_regions
 
 
 def ecs_auth_default(aws_region):
-    ecs_client = boto3.client('ecs', region_name=aws_region)
+    ecs_client = boto3.client(
+        'ecs',
+        region_name=aws_region
+    )
     return ecs_client
 
 
@@ -29,25 +27,17 @@ def ecs_auth_profile(aws_profile_name, aws_region):
         profile_name=aws_profile_name
     )
     # USE SESSION TO INITIALIZE A CLIENT
-    ecs_client = session.client('ecs', region_name=aws_region)
+    ecs_client = session.client(
+        'ecs',
+        region_name=aws_region
+    )
+    print('AWS: Trying to auth with profile {0} in region {1}'.format(aws_profile_name, aws_region))
     return ecs_client
 
 
 # ECS LIST CLUSTERS FUNCTION || RETURNS ARRAY OF CLUSTER NAMES
 def ecs_list_clusters(ecs_client):
-    # CHECK IF USER PROVIDED ANY CLUSTER NAMES
-    if len(settings.config['aws']['cluster names']) < 1:
-        # IF NOT GRAB ALL CLUSTER NAMES FROM AWS AND ASSIGN TO VARIABLE
-        ecs_cluster_names = ecs_client.list_clusters()
-    else:
-        # IF YES ASSIGN THEM TO VARIABLE
-        ecs_cluster_names = settings.config['aws']['cluster_names']
-
-    # CHECK IF MORE THAN ONE CLUSTER ...we will need to figure out how to handle this...
-    if len(ecs_cluster_names['clusterArns']) > 1:
-        print('Multiple ECS clusters detected', ecs_cluster_names['clusterArns'])
-    else:
-        print('One ECS cluster detected', ecs_cluster_names['clusterArns'])
+    ecs_cluster_names = ecs_client.list_clusters()
     return ecs_cluster_names
 
 
@@ -56,18 +46,18 @@ def ecs_list_services(ecs_client, ecs_cluster_name):
     ecs_service_names = ecs_client.list_services(
         cluster=ecs_cluster_name
     )
-    print('Found ', len(ecs_service_names['serviceArns']), ' Services')
-    return ecs_service_names
+    print('AWS: Found {0} Services'.format(len(ecs_service_names['serviceArns'])))
+    return ecs_service_names['serviceArns']
 
 
 # ECS DESCRIBE SERVICES FUNCTION
-def ecs_describe_services(ecs_client, ecs_service_names, ecs_cluster_name):
-    ecs_service_descriptions = ecs_client.describe_services(
+def ecs_describe_service(ecs_client, ecs_service_names, ecs_cluster_name):
+    ecs_service_description = ecs_client.describe_services(
         cluster=ecs_cluster_name,
         services=[ecs_service_names]
     )
-    print(ecs_service_descriptions)
-    return
+    # print(ecs_service_description)
+    return ecs_service_description
 
 
 # ECS DESCRIBE TASK DEFINITION
@@ -75,8 +65,8 @@ def ecs_describe_task_definition(ecs_client, ecs_task_name):
     ecs_task_description = ecs_client.describe_task_definition(
         taskDefinition=ecs_task_name
     )
-    print(ecs_task_description['containerDefinitions'])
-    return
+    print(ecs_task_description['taskDefinition']['containerDefinitions'][0]['image'])
+    return ecs_task_description
 
 
 # PARSE AWS ARN
