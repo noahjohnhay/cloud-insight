@@ -1,7 +1,6 @@
-#!/usr/bin/python3
+#!/usr/bin/python
+
 import boto3
-import logging
-import settings
 
 
 def ecs_list_regions():
@@ -56,7 +55,6 @@ def ecs_describe_service(ecs_client, ecs_service_names, ecs_cluster_name):
         cluster=ecs_cluster_name,
         services=[ecs_service_names]
     )
-    # print(ecs_service_description)
     return ecs_service_description
 
 
@@ -65,7 +63,6 @@ def ecs_describe_task_definition(ecs_client, ecs_task_name):
     ecs_task_description = ecs_client.describe_task_definition(
         taskDefinition=ecs_task_name
     )
-    print(ecs_task_description['taskDefinition']['containerDefinitions'][0]['image'])
     return ecs_task_description
 
 
