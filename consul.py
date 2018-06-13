@@ -1,7 +1,6 @@
-#!/usr/bin/python3
+#!/usr/bin/python
 
 import consul
-import logging
 
 # INITIATE CONSUL CONNECTION
 consul = consul.Consul(

@@ -6,6 +6,10 @@ __pycache__/
 # C extensions
 *.so
 
+config.json
+basic_table.html
+
+# Intellij
 *.iml
 .idea/*
 
