@@ -1,4 +1,5 @@
 # NEEDS A NEW NAME
+This is a project designed to simplify the tracking of docker container versions, health and other important information across various platforms.
 
 ## Installation
 
@@ -6,23 +7,20 @@
 pip install python-consul boto3 plotly
 ```
 
-## Links
-
-https://python-consul.readthedocs.io/en/latest/#id1
-
-
 ## Configuration
 
 ### AWS
 
-**Enabled** *required*
+ECS integration
 
-Enable AWS integration
+##### Enabled
+
+Whether or not to enable AWS Integration.
 ```
 "enabled": true
 ```
 
-**Regions** *optional*
+##### Region
 
 JSON formatted region configuration, if none is provided all clusters in all regions will be scanned.
 
@@ -38,7 +36,7 @@ JSON formatted region configuration, if none is provided all clusters in all reg
 }
 ```
 
-**Auth** *optional*
+##### Auth
 
 ```
 "auth": {
@@ -47,6 +45,19 @@ JSON formatted region configuration, if none is provided all clusters in all reg
     "profile_name_1",
     "profile_name_2"
   ]
+}
+```
+
+### Consul
+
+Consul is not currently functional
+
+### Output
+
+```
+"output": {
+  "enabled": true,
+  "type": "table"
 }
 ```
 
@@ -77,6 +88,10 @@ JSON formatted region configuration, if none is provided all clusters in all reg
   "logging": {
     "level": "INFO",
     "path": "temp.log"
+  },
+  "output": {
+    "enabled": true,
+    "type": "table"
   }
 }
 

@@ -16,7 +16,8 @@ def basic_table(services):
                 'Running Count',
                 'Cluster',
                 'Launch Type'
-            ]
+            ],
+            fill=dict(color='#a1c3d1')
         ),
         # DESCRIBE TABLE CONTENTS
         cells=dict(

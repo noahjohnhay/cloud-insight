@@ -61,7 +61,7 @@ def aws_caller(ecs_client, ecs_services):
             )
 
             # ADD VERSION ITEM TO DICTIONARY
-            service['version'] = ecs_task_description['taskDefinition']['containerDefinitions'][0]['image']
+            service['version'] = ecs_task_description['taskDefinition']['containerDefinitions'][0]['image'].split(':', 1)[-1]
 
             # APPEND DICTIONARY ITEMS TO ARRAY
             ecs_services.append(service)
@@ -74,6 +74,7 @@ def main():
 
     settings.init()
 
+    # IF AWS IS ENABLED
     if settings.config['aws']['enabled']:
 
         logging.info('AWS: Enabled')
@@ -106,8 +107,10 @@ def main():
                         ecs_client = aws.ecs_auth_profile(aws_profile_name, ecs_region)
                         aws_services = aws_caller(ecs_client, ecs_services)
 
-                # print(aws_services)
-                table.basic_table(aws_services)
+                # IF OUTPUT IS ENABLED
+                if settings.config['output']['enabled']:
+                    if settings.config['output']['type'] == 'table':
+                        table.basic_table(aws_services)
 
         elif settings.config['aws']['auth']['type'] == 'default':
             logging.info('AWS: Using default authentication')

@@ -42,11 +42,20 @@ def ecs_list_clusters(ecs_client):
 
 # ECS LIST SERVICES FUNCTION || RETURNS ARRAY OF SERVICE NAMES
 def ecs_list_services(ecs_client, ecs_cluster_name):
-    ecs_service_names = ecs_client.list_services(
+
+    paginator = ecs_client.get_paginator('list_services')
+
+    page_iterator = paginator.paginate(
         cluster=ecs_cluster_name
     )
-    print('AWS: Found {0} Services'.format(len(ecs_service_names['serviceArns'])))
-    return ecs_service_names['serviceArns']
+
+    ecs_service_names = []
+
+    for page in page_iterator:
+        ecs_service_names.extend(page['serviceArns'])
+
+    print('AWS: Found {0} Services'.format(len(ecs_service_names)))
+    return ecs_service_names
 
 
 # ECS DESCRIBE SERVICES FUNCTION
