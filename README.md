@@ -61,6 +61,8 @@ Consul is not currently functional
 }
 ```
 
+![Alt text](examples/basic_table.png?raw=true "Basic Table")
+
 ## Examples
 
 ```
