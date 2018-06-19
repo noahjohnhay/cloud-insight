@@ -28,7 +28,15 @@ def basic_table(services):
                 [service['running_count'] for service in services],
                 [service['cluster'] for service in services],
                 [service['launch_type'] for service in services]
-            ]
+            ],
+            fill=dict(
+                color=['#F5F4F4',
+                       '#F5F4F4',
+                       ['#24F015' if service['desired_count'] == service['running_count'] else '#DA100C' for service in services],
+                       ['#24F015' if service['desired_count'] == service['running_count'] else '#DA100C' for service in services],
+                       '#F5F4F4',
+                       '#F5F4F4']
+            )
         )
     )
 
