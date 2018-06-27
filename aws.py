@@ -3,6 +3,7 @@
 import boto3
 
 
+# ECS LIST REGIONS
 def ecs_list_regions():
     session = boto3.Session()
     all_regions = session.get_available_regions(
@@ -11,6 +12,7 @@ def ecs_list_regions():
     return all_regions
 
 
+# ECS DEFAULT AUTHENTICATION
 def ecs_auth_default(aws_region):
     ecs_client = boto3.client(
         'ecs',
@@ -19,7 +21,7 @@ def ecs_auth_default(aws_region):
     return ecs_client
 
 
-# AWS AUTH PROFILE FUNCTION || RETURNS A CLIENT WITH A PROFILE SESSION
+# AWS PROFILE AUTHENTICATION
 def ecs_auth_profile(aws_profile_name, aws_region):
     # CREATE SESSION USING PROFILE NAME
     session = boto3.Session(
@@ -42,18 +44,13 @@ def ecs_list_clusters(ecs_client):
 
 # ECS LIST SERVICES FUNCTION || RETURNS ARRAY OF SERVICE NAMES
 def ecs_list_services(ecs_client, ecs_cluster_name):
-
     paginator = ecs_client.get_paginator('list_services')
-
     page_iterator = paginator.paginate(
         cluster=ecs_cluster_name
     )
-
     ecs_service_names = []
-
     for page in page_iterator:
         ecs_service_names.extend(page['serviceArns'])
-
     print('AWS: Found {0} Services'.format(len(ecs_service_names)))
     return ecs_service_names
 
@@ -88,7 +85,7 @@ def parse_arn(arn):
         'resource_type': None
     }
     if '/' in result['resource']:
-        result['resource_type'], result['resource'] = result['resource'].split('/',1)
+        result['resource_type'], result['resource'] = result['resource'].split('/', 1)
     elif ':' in result['resource']:
-        result['resource_type'], result['resource'] = result['resource'].split(':',1)
+        result['resource_type'], result['resource'] = result['resource'].split(':', 1)
     return result
