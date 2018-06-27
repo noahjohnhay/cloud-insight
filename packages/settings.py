@@ -3,7 +3,6 @@
 import json
 import logging
 
-
 # INITIALIZE SETTINGS
 def init():
     global config
