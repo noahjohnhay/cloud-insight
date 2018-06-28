@@ -73,7 +73,7 @@ def aws_caller(ecs_client, ecs_services):
 
 
 def execute():
-    print('test')
+
     settings.init()
 
     # IF AWS IS ENABLED
