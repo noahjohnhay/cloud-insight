@@ -3,4 +3,3 @@ cement
 docker
 plotly
 PrettyTable
-python-consul

@@ -19,8 +19,7 @@ REQUIRED = [
     'boto3',
     'cement',
     'plotly',
-    'PrettyTable',
-    'python-consul',
+    'PrettyTable'
 ]
 
 setup(
