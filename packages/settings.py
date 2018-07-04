@@ -4,6 +4,7 @@ import json
 
 
 
+
 # INITIALIZE SETTINGS
 def init():
     global config
