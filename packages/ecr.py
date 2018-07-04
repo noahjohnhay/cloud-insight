@@ -1,10 +1,8 @@
 #!/usr/bin/python
 
-import boto3
 
-
-# LIST REPOSITORIES
-def list_repositories(client):
+# DESCRIBE REPOSITORIES
+def describe_repositories(client):
     paginator = client.get_paginator('describe_repositories')
     page_iterator = paginator.paginate()
     repositories = []

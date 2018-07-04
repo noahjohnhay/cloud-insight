@@ -33,12 +33,3 @@ def auto_scaling_groups_instance_ids(auto_scaling_groups):
     instances = auto_scaling_groups_instances(auto_scaling_groups)
     instance_ids = auto_scaling_group_instance_ids(instances)
     return instance_ids
-
-
-# # GET INSTANCE IDS FROM AUTO SCALING GROUP
-# def jon(auto_scaling_groups):
-#     instances = auto_scaling_groups_instances(auto_scaling_groups)
-#     instance_ids = []
-#     for instance in instances:
-#         instance_ids.append(instance["InstanceId"])
-#     return instance_ids
