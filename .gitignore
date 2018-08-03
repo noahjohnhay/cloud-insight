@@ -8,6 +8,7 @@ __pycache__/
 
 config.json
 basic_table.html
+.docker.config
 
 # Intellij
 *.iml
