@@ -1,4 +1,5 @@
 boto3
-python-consul
-plotly
 cement
+docker
+plotly
+python-consul

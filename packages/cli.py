@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 from cement.core.foundation import CementApp
 from cement.core.controller import CementBaseController, expose
 from packages.executor import execute
