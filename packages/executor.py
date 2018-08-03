@@ -163,6 +163,3 @@ def execute():
             logging.error('AWS: Could not determine auth type')
     else:
         logging.error('MAIN: Nothing is enabled')
-
-
-
