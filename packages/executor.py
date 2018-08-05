@@ -63,7 +63,8 @@ def aws_caller(ecs_client, ecs_services):
             )
 
             # ADD VERSION ITEM TO DICTIONARY
-            service['version'] = ecs_task_description['taskDefinition']['containerDefinitions'][0]['image'].split(':', 1)[-1]
+            service['version'] = ecs_task_description \
+                ['taskDefinition']['containerDefinitions'][0]['image'].split(':', 1)[-1]
 
             # APPEND DICTIONARY ITEMS TO ARRAY
             ecs_services.append(service)
@@ -71,8 +72,7 @@ def aws_caller(ecs_client, ecs_services):
     return ecs_services
 
 
-# MAIN PROGRAM
-def main():
+def execute():
 
     settings.init()
 
@@ -163,36 +163,3 @@ def main():
             logging.error('AWS: Could not determine auth type')
     else:
         logging.error('MAIN: Nothing is enabled')
-
-
-'''
-    # FOR EACH PROFILE
-    for aws_profile_name in settings.config['aws']['auth']['profile names']:
-
-        print('AWS: Trying to auth with profile {0}'.format(aws_profile_name))
-
-        # IF NO REGIONS ARE SPECIFIED FETCH ALL
-        if len(settings.config['aws']['regions']) == 0:
-
-            logging.info('AWS: Regions is empty, fetching all regions')
-
-            # FOR EACH REGION
-            for ecs_region in aws.list_regions('autoscaling'):
-
-                ecs_client = aws.profile_client(aws_profile_name, ecs_region, 'autoscaling')
-
-                auto_scaling_groups = asg.describe_auto_scaling_groups(ecs_client)
-
-        else:
-
-            # FOR EACH REGION
-            for ecs_region in settings.config['aws']['regions']:
-
-                ecs_client = aws.profile_client(aws_profile_name, ecs_region, 'autoscaling')
-
-                auto_scaling_groups = asg.describe_auto_scaling_groups(ecs_client)
-
-        print(asg.auto_scaling_groups_instance_ids(auto_scaling_groups))
-'''
-
-main()

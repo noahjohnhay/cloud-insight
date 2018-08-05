@@ -11,7 +11,8 @@ def login(credentials):
     docker_client.login(
         username=credentials[0],
         password=credentials[1],
-        registry=credentials[2])
+        registry=credentials[2],
+        dockercfg_path='.docker.config')
     return
 
 
