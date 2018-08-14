@@ -2,8 +2,8 @@
 
 
 # DESCRIBE ALL AUTO SCALING GROUPS
-def describe_auto_scaling_groups(client):
-    print("Listing Auto Scaling Groups")
+def describe_auto_scaling_groups(app, client):
+    app.log.info('Listing Auto Scaling Groups')
     paginator = client.get_paginator('describe_auto_scaling_groups')
     page_iterator = paginator.paginate()
     auto_scaling_groups = []

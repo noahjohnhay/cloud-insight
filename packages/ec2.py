@@ -19,5 +19,21 @@ def describe_instances(client, instance_ids):
     )
     instances = []
     for page in page_iterator:
-        instances.extend(page['Reservations'][0]['Instances'])
+        instances.extend(page['Reservations'])
     return instances
+
+
+# FETCH INSTANCE IPS
+def describe_instances_ips(client, instance_ids):
+    paginator = client.get_paginator('describe_instances')
+    page_iterator = paginator.paginate(
+        InstanceIds=instance_ids,
+        Filters=[{'Name': 'tag:deploy_env', 'Values': ['dev']}]
+    )
+    instances = []
+    ips = []
+    for page in page_iterator:
+        instances.extend(page['Reservations'])
+    for reservation in instances:
+        ips.append(reservation['Instances'][0]['PrivateIpAddress'])
+    return ips

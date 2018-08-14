@@ -22,7 +22,7 @@ def default_client(region, service):
 
 
 # PROFILE CLIENT
-def profile_client(profile_name, region, service):
+def profile_client(app, profile_name, region, service):
     session = boto3.Session(
         profile_name=profile_name
     )
@@ -30,7 +30,7 @@ def profile_client(profile_name, region, service):
         service,
         region_name=region
     )
-    print('AWS: Trying to auth with profile {0} in region {1}'.format(profile_name, region))
+    app.log.info('AWS: Trying to auth with profile {0} in region {1}'.format(profile_name, region))
     return client
 
 

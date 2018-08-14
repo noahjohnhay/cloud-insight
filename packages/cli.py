@@ -2,7 +2,7 @@
 
 from cement.core.foundation import CementApp
 from cement.core.controller import CementBaseController, expose
-from packages.executor import execute
+import packages.executor as executor
 
 """Manages CLI commands through the Cement Framework and executes
    cloud insight from here.
@@ -16,22 +16,29 @@ class BaseController(CementBaseController):
                       "health and other important information across various platforms."
         arguments = [
             (['-p', '--profile'],
-             dict(action='store', help='cvent-aws-cli profile to run against'))
+             dict(action='store', help='aws profile to run against'))
             ]
 
     @expose(hide=True)
     def default(self):
-        self.app.log.info('Running Cloud-insight')
-        if self.app.pargs.profile:
-            self.app.log.info("Running against profile: {profile}".format(profile=self.app.pargs.profile))
-        execute()
+        executor.default_command(self.app)
+
+    @expose(help="This command will list the container information")
+    def list(self):
+        executor.list_command(self.app)
+
+    @expose(help="This command will compare two sets of containers")
+    def compare(self):
+        executor.compare_command(self.app)
 
 
 class CloudInsight(CementApp):
     class Meta:
-        label = 'cloud-insight'
         base_controller = 'base'
+        config_handler = 'json'
+        extensions = ['json']
         handlers = [BaseController]
+        label = 'cloud-insight'
 
 
 def main():
