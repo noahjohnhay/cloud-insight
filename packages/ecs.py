@@ -8,7 +8,7 @@ def list_clusters(client):
 
 
 # LIST SERVICES
-def list_services(client, cluster_name):
+def list_services(app, client, cluster_name):
     paginator = client.get_paginator('list_services')
     page_iterator = paginator.paginate(
         cluster=cluster_name
@@ -16,7 +16,7 @@ def list_services(client, cluster_name):
     service_names = []
     for page in page_iterator:
         service_names.extend(page['serviceArns'])
-    print('AWS: Found {0} Services'.format(len(service_names)))
+    app.log.info('Found {0} Services'.format(len(service_names)))
     return service_names
 
 
