@@ -4,10 +4,6 @@ from cement.core.foundation import CementApp
 from cement.core.controller import CementBaseController, expose
 import packages.executor as executor
 
-"""Manages CLI commands through the Cement Framework and executes
-   cloud insight from here.
-"""
-
 
 class BaseController(CementBaseController):
     class Meta:
@@ -15,8 +11,8 @@ class BaseController(CementBaseController):
         description = "Simplifies the tracking of docker container versions, " \
                       "health and other important information across various platforms."
         arguments = [
-            (['-p', '--profile'],
-             dict(action='store', help='aws profile to run against'))
+            (['-c', '--config'],
+             dict(action='store', help='Path to configuration file to use'))
             ]
 
     @expose(hide=True)
@@ -36,15 +32,13 @@ class CloudInsight(CementApp):
     class Meta:
         base_controller = 'base'
         config_handler = 'json'
-        extensions = ['json']
+        extensions = ['colorlog', 'json']
         handlers = [BaseController]
         label = 'cloud-insight'
+        log_handler = 'colorlog'
 
 
 def main():
-    """Runs the commands and subcommands from here. Setup.py defines
-       This function as the driver method for the application.
-    """
     with CloudInsight() as app:
         app.run()
 

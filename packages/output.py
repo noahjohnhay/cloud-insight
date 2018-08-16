@@ -6,6 +6,7 @@ from prettytable import PrettyTable
 
 
 def main(app, services):
+
     # IF OUTPUT IS ENABLED
     if app.config.get_section_dict('output')['enabled']:
 

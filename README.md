@@ -4,15 +4,26 @@ This is a project designed to simplify the tracking of docker container versions
 ## Installation
 
 ```
-python setup.py
+python setup.py install
 ```
 
 ## Running
-ensure config.json is located at the root of the repo
+
+##### CLI
 
 ```
-python cli.py --help
-python cli.py list
+cloud-insight --help
+cloud-insight list --config "path/to/config.json"
+```
+
+##### DOCKER
+
+```
+docker run  \
+-v absolute/path/to/.aws:/root/.aws:ro \
+-v .:/project \
+cloud-insight:1.0.0 list \
+-config "/project/relative/path/to/config"
 ```
 
 ### Commands
