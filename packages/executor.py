@@ -2,7 +2,6 @@
 
 import packages.aws as aws
 import packages.ecs as ecs
-import packages.settings as settings
 import packages.output as output
 import sys
 
@@ -80,9 +79,7 @@ def default_command(app):
 
 def list_command(app):
     app.log.info('Running list command')
-    app.config.parse_file('../config.json')
-
-    settings.init()
+    app.config.parse_file(app.pargs.config)
 
     # IF AWS IS ENABLED
     if app.config.get_section_dict('aws')['enabled']:
@@ -151,8 +148,18 @@ def list_command(app):
             output.main(app, aws_services)
 
             app.log.info('AWS: Could not determine auth type')
+
+        else:
+
+            app.log.error('AWS: Could not determine authentication type')
+
+            sys.exit(1)
+
     else:
+
         app.log.error('MAIN: Nothing is enabled')
+
+        sys.exit(1)
 
 
 def compare_command(app):
