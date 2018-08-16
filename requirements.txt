@@ -1,5 +1,6 @@
 boto3
 cement
+colorlog
 docker
 plotly
 PrettyTable
