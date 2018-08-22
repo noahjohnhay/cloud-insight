@@ -24,7 +24,7 @@ def list_helper(app, aws_auth_type, aws_enabled, aws_profile_names, aws_regions)
         # ITERATE THROUGH ALL CREATED CLIENTS
         for ecs_client in aws.all_clients(
                 app=app,
-                auth_type='profile',
+                auth_type=aws_auth_type,
                 aws_service='ecs',
                 aws_profile_names=aws_profile_names,
                 aws_regions=aws_regions):
