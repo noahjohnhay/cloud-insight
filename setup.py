@@ -17,7 +17,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 REQUIRED = [
     'boto3',
     'colorlog',
-    'cement',
+    'cement==2.10.12',
     'plotly',
     'PrettyTable'
 ]
