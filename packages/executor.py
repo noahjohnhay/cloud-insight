@@ -3,164 +3,102 @@
 import packages.aws as aws
 import packages.ecs as ecs
 import packages.output as output
-import sys
 
 
-def aws_caller(app, ecs_client, ecs_services):
+def list_helper(app, aws_auth_type, aws_enabled, aws_profile_names, aws_regions):
 
-    # ITERATE THROUGH ECS CLUSTERS
-    for ecs_cluster in ecs.list_clusters(ecs_client)['clusterArns']:
+    # CREATE EMPTY ARRAY
+    ecs_services = []
 
-        # PRINT CLUSTERS
-        app.log.info('AWS: Found cluster {0}'.format(
-            aws.parse_arn(ecs_cluster)['resource'])
-        )
+    # IF AWS IS ENABLED
+    if aws_enabled:
 
-        # ITERATE THROUGH SERVICES IN EACH CLUSTER
-        for ecs_service in ecs.list_services(app, ecs_client, aws.parse_arn(ecs_cluster)['resource']):
+        app.log.info('AWS: Enabled')
 
-            # CREATE SERVICE DICTIONARY
-            service = dict()
+        # IF AWS AUTH TYPE IS DEFAULT
+        if aws_auth_type == 'default':
 
-            # ADD SERVICE ITEM TO DICTIONARY
-            service['name'] = aws.parse_arn(ecs_service)['resource']
+            # SET AWS PROFILE NAMES TO NONE
+            aws_profile_names = None
 
-            # ADD CLUSTER ITEM TO DICTIONARY
-            service['cluster'] = aws.parse_arn(ecs_cluster)['resource']
+        # ITERATE THROUGH ALL CREATED CLIENTS
+        for ecs_client in aws.all_clients(
+                app=app,
+                auth_type='profile',
+                aws_service='ecs',
+                aws_profile_names=aws_profile_names,
+                aws_regions=aws_regions):
 
-            # PRINT SERVICES
-            app.log.info('AWS: Found service {0}'.format(
-                aws.parse_arn(ecs_service)['resource'])
+            # CREATE ARRAY OF SERVICE DICTIONARIES
+            ecs_services = ecs.service_dictionary(
+                app=app,
+                ecs_client=ecs_client,
+                ecs_services=ecs_services
             )
 
-            # DESCRIBE SERVICES
-            ecs_service_description = ecs.describe_service(
-                ecs_client,
-                aws.parse_arn(ecs_service)['resource'],
-                aws.parse_arn(ecs_cluster)['resource']
-            )
+    else:
 
-            # PRINT SERVICE DESCRIPTION
-            app.log.info('AWS: Service {0}, Count {1}, Active Task Definition {2}'.format(
-                aws.parse_arn(ecs_service)['resource'],
-                ecs_service_description['services'][0]['desiredCount'],
-                ecs_service_description['services'][0]['taskDefinition'])
-            )
+        app.log.error('MAIN: Nothing is enabled')
 
-            # ADD COUNT INFORMATION TO DICTIONARY
-            service['desired_count'] = ecs_service_description['services'][0]['desiredCount']
-            service['running_count'] = ecs_service_description['services'][0]['runningCount']
+        app.close(1)
 
-            # ADD LAUNCH TYPE INFORMATION TO DICTIONARY
-            service['launch_type'] = ecs_service_description['services'][0]['launchType']
-
-            # DESCRIBE TASK DEFINITIONS
-            ecs_task_description = ecs.describe_task_definition(
-                ecs_client,
-                ecs_service_description['services'][0]['taskDefinition']
-            )
-
-            # ADD VERSION ITEM TO DICTIONARY
-            service['version'] = \
-                ecs_task_description['taskDefinition']['containerDefinitions'][0]['image'].split(':', 1)[-1]
-
-            # APPEND DICTIONARY ITEMS TO ARRAY
-            ecs_services.append(service)
-
-    sorted_ecs_services = sorted(ecs_services, key=lambda k: k['name'])
-
-    return sorted_ecs_services
+    return ecs_services
 
 
 def default_command(app):
     app.log.error('A namespace must be specified use "--help" to see all options')
-    sys.exit(1)
+    app.close(1)
 
 
 def list_command(app):
     app.log.info('Running list command')
     app.config.parse_file(app.pargs.config)
 
-    # IF AWS IS ENABLED
-    if app.config.get_section_dict('aws')['enabled']:
+    ecs_services = list_helper(
+        app=app,
+        aws_auth_type=app.config.get_section_dict('aws')['auth']['type'],
+        aws_enabled=app.config.get_section_dict('aws')['enabled'],
+        aws_profile_names=app.config.get_section_dict('aws')['auth']['profile names'],
+        aws_regions=app.config.get_section_dict('aws')['regions']
+    )
 
-        app.log.info('AWS: Enabled')
+    # APPLY FILTERING
+    ecs_services = output.filter_dict(app, ecs_services)
 
-        ecs_services = []
+    # APPLY REPLACEMENTS
+    ecs_services = output.replace_dictionary(app, ecs_services)
 
-        # IF AWS AUTH TYPE IS PROFILE CALL aws_auth_profile() FUNCTION
-        if app.config.get_section_dict('aws')['auth']['type'] == 'profile':
-
-            app.log.info('AWS: Using profile authentication')
-
-            # FOR EACH PROFILE
-            for aws_profile_name in app.config.get_section_dict('aws')['auth']['profile names']:
-
-                app.log.info('AWS: Trying to auth with profile {0}'.format(aws_profile_name))
-
-                # IF NO REGIONS ARE SPECIFIED FETCH ALL
-                if len(app.config.get_section_dict('aws')['regions']) == 0:
-
-                    app.log.info('AWS: Regions is empty, fetching all regions')
-
-                    # FOR EACH REGION
-                    for ecs_region in aws.list_regions('ecs'):
-
-                        ecs_client = aws.profile_client(app, aws_profile_name, ecs_region, 'ecs')
-
-                        aws_services = aws_caller(app, ecs_client, ecs_services)
-                else:
-
-                    # FOR EACH REGION
-                    for ecs_region in app.config.get_section_dict('aws')['regions']:
-
-                        ecs_client = aws.profile_client(app, aws_profile_name, ecs_region, 'ecs')
-
-                        aws_services = aws_caller(app, ecs_client, ecs_services)
-
-                output.main(app, aws_services)
-
-        # IF AWS AUTH TYPE IS DEFAULT
-        elif app.config.get_section_dict('aws')['auth']['type'] == 'default':
-
-            app.log.info('AWS: Using default authentication')
-
-            # IF NO REGIONS ARE SPECIFIED FETCH ALL
-            if len(app.config.get_section_dict('aws')['regions']) == 0:
-
-                app.log.info('AWS: Regions is empty, fetching all regions')
-
-                # FOR EACH REGION
-                for ecs_region in aws.list_regions('ecs'):
-
-                    ecs_client = aws.default_client(ecs_region, 'ecs')
-
-                    aws_services = aws_caller(app, ecs_client, ecs_services)
-            else:
-
-                # FOR EACH REGION
-                for ecs_region in app.config.get_section_dict('aws')['regions']:
-
-                    ecs_client = aws.default_client(ecs_region, 'ecs')
-
-                    aws_services = aws_caller(app, ecs_client, ecs_services)
-
-            output.main(app, aws_services)
-
-            app.log.info('AWS: Could not determine auth type')
-
-        else:
-
-            app.log.error('AWS: Could not determine authentication type')
-
-            sys.exit(1)
-
-    else:
-
-        app.log.error('MAIN: Nothing is enabled')
-
-        sys.exit(1)
+    # PRINT OUTPUTS
+    output.main(app, ecs_services)
 
 
 def compare_command(app):
     app.log.info('Running compare command')
+    app.config.parse_file(app.pargs.config)
+
+    source_services = list_helper(
+        app=app,
+        aws_auth_type=app.config.get_section_dict('source')['aws']['auth']['type'],
+        aws_enabled=app.config.get_section_dict('source')['aws']['enabled'],
+        aws_profile_names=app.config.get_section_dict('source')['aws']['auth']['profile names'],
+        aws_regions=app.config.get_section_dict('source')['aws']['regions']
+    )
+
+    destination_services = list_helper(
+        app=app,
+        aws_auth_type=app.config.get_section_dict('destination')['aws']['auth']['type'],
+        aws_enabled=app.config.get_section_dict('destination')['aws']['enabled'],
+        aws_profile_names=app.config.get_section_dict('destination')['aws']['auth']['profile names'],
+        aws_regions=app.config.get_section_dict('destination')['aws']['regions']
+    )
+
+    # APPLY FILTERING
+    source_services = output.filter_dict(app, source_services)
+    destination_services = output.filter_dict(app, destination_services)
+
+    # APPLY REPLACEMENTS
+    source_services = output.replace_dictionary(app, source_services)
+    destination_services = output.replace_dictionary(app, destination_services)
+
+    print (source_services)
+    print (destination_services)

@@ -1,22 +1,26 @@
-# NEEDS A NEW NAME
+# CLOUD-INSIGHT
 This is a project designed to simplify the tracking of docker container versions, health and other important information across various platforms.
-
-## Installation
-
-```
-python setup.py install
-```
 
 ## Running
 
-##### CLI
+#### CLI
+
+[PyPI](https://pypi.org/project/cloud-insight/ "PyPI")
+
+```
+pip install cloud-inisight
+```
 
 ```
 cloud-insight --help
 cloud-insight list --config "path/to/config.json"
 ```
 
-##### DOCKER
+#### DOCKER
+![alt text](https://img.shields.io/docker/pulls/noahjohnhay/cloud-insight.svg "Docker Pulls")
+![alt text](https://img.shields.io/docker/stars/noahjohnhay/cloud-insight.svg "Docker Stars")
+
+[Docker Hub](https://hub.docker.com/r/noahjohnhay/cloud-insight/ "Docker Hub")
 
 ```
 docker run  \
@@ -97,7 +101,7 @@ An HTML formatted table using Plotly
 type: "html_table"
 ```
 
-![Alt text](examples/basic_table.png?raw=true "Basic Table")
+![Alt text](examples/html_table.png?raw=true "Basic Table")
 
 ##### CLI Table
 A CLI Table using PrettyTable
@@ -112,6 +116,17 @@ type: "cli_table"
   "enabled": true,
   "type": "html_table"
 }
+```
+
+##### Filters
+Filtering the results
+
+```
+"filters": {
+      "cluster": [
+        "example"
+      ]
+    }
 ```
 
 ## Examples

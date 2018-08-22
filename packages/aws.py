@@ -3,7 +3,7 @@
 import boto3
 
 
-# LIST REGIONS
+# LIST ALL REGIONS BY SERVICE
 def list_regions(service):
     session = boto3.Session()
     all_regions = session.get_available_regions(
@@ -12,7 +12,40 @@ def list_regions(service):
     return all_regions
 
 
-# DEFAULT CLIENT
+# CREATE ALL CLIENTS
+def all_clients(app, auth_type, aws_service, aws_profile_names=None, aws_regions=None):
+    clients = []
+    if aws_regions is None:
+        app.log.info('AWS: Regions is empty, fetching all regions')
+        aws_regions = list_regions(aws_service)
+    if auth_type == 'profile':
+        app.log.info('AWS: Using profile authentication')
+        for aws_profile_name in aws_profile_names:
+            for aws_region in aws_regions:
+                clients.append(
+                    profile_client(
+                        app=app,
+                        profile_name=aws_profile_name,
+                        region=aws_region,
+                        service=aws_service
+                    )
+                )
+    elif auth_type == 'default':
+        app.log.info('AWS: Using default authentication')
+        for aws_region in aws_regions:
+            clients.append(
+                default_client(
+                    region=aws_region,
+                    service=aws_service
+                )
+            )
+    else:
+        app.log.error('AWS: Could not determine authentication type')
+        app.close(1)
+    return clients
+
+
+# CREATE DEFAULT CLIENT
 def default_client(region, service):
     client = boto3.client(
         service,
@@ -21,7 +54,7 @@ def default_client(region, service):
     return client
 
 
-# PROFILE CLIENT
+# CREATE PROFILE CLIENT
 def profile_client(app, profile_name, region, service):
     session = boto3.Session(
         profile_name=profile_name

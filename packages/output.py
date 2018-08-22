@@ -1,7 +1,6 @@
 #!/usr/bin/python
 
 import plotly
-import sys
 from prettytable import PrettyTable
 
 
@@ -32,7 +31,7 @@ def main(app, services):
 
             app.log.error('OUTPUT: No valid output type selected')
 
-            sys.exit(1)
+            app.close(1)
 
     else:
 
@@ -70,7 +69,7 @@ def html_table(services):
         # DESCRIBE TABLE CONTENTS
         cells=dict(
             values=[
-                [service['name'] for service in services],
+                [service['service'] for service in services],
                 [service['version'] for service in services],
                 [service['desired_count'] for service in services],
                 [service['running_count'] for service in services],
@@ -133,7 +132,7 @@ def cli_table(services):
     # INSERT DATA INTO TABLE
     for service in services:
         table.add_row([
-            service['name'],
+            service['service'],
             service['version'],
             service['desired_count'],
             service['running_count'],
@@ -144,3 +143,47 @@ def cli_table(services):
     print(table)
 
     return
+
+
+def filter_dict(app, services):
+
+    # CHECK IF THERE ARE ANY FILTERS
+    if 'filter' in app.config.get_section_dict('output'):
+
+        app.log.info('OUTPUT: Filtering enabled')
+
+        # FOR EACH FILTER KEY
+        for filter_key in app.config.get_section_dict('output')['filter']:
+
+            # ASSIGN THE VALUES FROM THE FILTER KEY TO VARIABLE
+            filter_list = app.config.get_section_dict('output')['filter'][filter_key]
+
+            # FILTER DICTIONARY BASED ON FILTER KEY & FILTER LIST
+            services = [
+                d for d in services if d[filter_key] in filter_list
+            ]
+
+    return services
+
+
+def replace_dictionary(app, services):
+
+    if 'replace' in app.config.get_section_dict('output'):
+
+        app.log.info('OUTPUT: Replacing enabled')
+
+        # ITERATE THROUGH EACH SERVICE DICTIONARY
+        for service in services:
+
+            # FOR EACH REPLACE KEY (ex: 'service', 'cluster')
+            for replace_key in app.config.get_section_dict('output')['replace']:
+
+                # FETCH DICTIONARY OF REPLACEMENTS
+                replace_dict = app.config.get_section_dict('output')['replace'][replace_key]
+
+                # ITERATE THROUGH REPLACEMENTS
+                for item in replace_dict.keys():
+
+                    service[replace_key] = service[replace_key].replace(item, replace_dict[item])
+
+    return services
