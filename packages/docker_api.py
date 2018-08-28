@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 import docker
 
 
@@ -29,7 +27,7 @@ def parse_image(image):
             'parsedName': split_name[0],
             'parsedVersion': split_name[1],
         }
-    except:
+    except Exception as e:
         result = {
             'dockerName': image,
             'parsedName': image,
