@@ -32,6 +32,7 @@ wheels/
 .installed.cfg
 *.egg
 MANIFEST
+cloud_insight.egg-info/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -112,3 +113,7 @@ venv.bak/
 .mypy_cache/
 
 test-configs/
+
+# Macbook stuff
+.DS_Store/
+examples/.DS_Store

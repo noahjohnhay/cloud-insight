@@ -1,5 +1,12 @@
 language: python
 python:
-- "2.7"
+- '2.7'
 install:
-  - python setup.py
+- pip install tox-travis
+script:
+- tox
+deploy:
+  provider: pypi
+  user: DjangoFett
+  password:
+    secure: hpbylG/9UiPsRbq2kaO7mFORjZ7iAexPSylUMU6JfrM4qIPZ611SnciP72O8Fnu1HyAj2CFaIxLgGAvsa0Yx9uk1yJzF+rsQcpOHmXE14KECsmNRiaCGPieHl7CAysnPDEh3RDO19mJ9+29qdxCMEWUvpi9JiT4LVsREzOVTK63cdmOSbQm5YFplXHrCpd7MO4SYMyr7jZrpWuHH02bqWDuhHGG2qjJQ2O9mKNmGu4eOU7nfnBAUOn+cHmZxnLNTTVk22sO3sfUuXY7G8Vwx2DMPh5m0khP6MuAp/+Am7VWP9VN5t1mnl6e81zkyzLUCRyX1mVaIc/Ls1F+CJM+M0qx8OCeAew0S+SxXtVrig+tgIL31Ilw18LkWDRZgaKNGnWkfHJMy5EUTvOTReDOMxJZF8wTU/nxzcRcMJavHsXY1M2nk5e9NTSul5/k1IMlyWtoW8uLSHVraCGTcVBh96+/RrCS7LNp/hRoS57erimNUPu5lO9+4EWZUiqc6SEJTfJOGos05ncjo1DwNcYieh3Nxcfg/onpPh0aBjlDKAc8Yl408tN0yN7qWZ5/OdXR00x3idvYamvMz9eB91D3b0qfTn0KucRwLpSgu/8ERrlnRjLvQ3VbYbURtGNs6qW9lSkikRFUgvuOKligb0ZxGh10/OW4Fc7huONYuek1Eook=

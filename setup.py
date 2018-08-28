@@ -1,13 +1,11 @@
-#!/usr/bin/python
-
 import os
-
 from setuptools import find_packages, setup
 
 # Package meta-data.
 NAME = 'cloud-insight'
-DESCRIPTION = 'Simplifies the tracking of docker container versions,' \
-              ' health and other important information across various platforms.'
+DESCRIPTION = 'Simplifies the tracking of docker container versions, ' \
+              'health and other important information across various ' \
+              'platforms.'
 URL = 'https://github.com/noahjohnhay/cloud-insight'
 EMAIL = "noahjohnhay@gmail.com"
 AUTHOR = 'Noah Hay'
@@ -31,8 +29,8 @@ setup(
     url=URL,
     packages=find_packages(exclude=('tests',)),
     entry_points={
-         'console_scripts': ['cloud-insight=packages.cli:main'],
-     },
+        'console_scripts': ['cloud-insight=packages.cli:main'],
+    },
     install_requires=REQUIRED,
     include_package_data=True,
     license='MIT',

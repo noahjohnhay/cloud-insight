@@ -1,97 +1,181 @@
-#!/usr/bin/python
-
 import cloud_insight.aws as aws
 import cloud_insight.ecs as ecs
 import mod_str as mod_str
 import cloud_insight.output as output
 
 
-def list_helper(app, aws_auth_type, aws_enabled, aws_profile_names, aws_regions):
+def aws_caller(ecs_client, ecs_services):
 
-    # CREATE EMPTY ARRAY
-    ecs_services = []
+    # ITERATE THROUGH ECS CLUSTERS
+    for ecs_cluster in ecs.list_clusters(ecs_client)['clusterArns']:
 
-    # IF AWS IS ENABLED
-    if aws_enabled:
+        # PRINT CLUSTERS
+        print('AWS: Found cluster {0}'.format(
+            aws.parse_arn(ecs_cluster)['resource'])
+        )
 
-        app.log.info('AWS: Enabled')
+        # ITERATE THROUGH SERVICES IN EACH CLUSTER
+        for ecs_service in \
+                ecs.list_services(ecs_client,
+                                  aws.parse_arn(ecs_cluster)['resource']):
 
-        # IF AWS AUTH TYPE IS DEFAULT
-        if aws_auth_type == 'default':
+            # CREATE SERVICE DICTIONARY
+            service = dict()
 
-            # SET AWS PROFILE NAMES TO NONE
-            aws_profile_names = None
+            # ADD SERVICE ITEM TO DICTIONARY
+            service['name'] = aws.parse_arn(ecs_service)['resource']
 
-        # ITERATE THROUGH ALL CREATED CLIENTS
-        for ecs_client in aws.all_clients(
-                app=app,
-                auth_type=aws_auth_type,
-                aws_service='ecs',
-                aws_profile_names=aws_profile_names,
-                aws_regions=aws_regions):
+            # ADD CLUSTER ITEM TO DICTIONARY
+            service['cluster'] = aws.parse_arn(ecs_cluster)['resource']
 
-            # CREATE ARRAY OF SERVICE DICTIONARIES
-            ecs_services = ecs.service_dictionary(
-                app=app,
-                ecs_client=ecs_client,
-                ecs_services=ecs_services
+            # PRINT SERVICES
+            print('AWS: Found service {0}'.format(
+                aws.parse_arn(ecs_service)['resource'])
             )
 
-    else:
+            # DESCRIBE SERVICES
+            ecs_service_description = ecs.describe_service(
+                ecs_client,
+                aws.parse_arn(ecs_service)['resource'],
+                aws.parse_arn(ecs_cluster)['resource']
+            )
 
-        app.log.error('MAIN: Nothing is enabled')
+            resource = aws.parse_arn(ecs_service)['resource']
+            desired_count = \
+                ecs_service_description['services'][0]['desiredCount']
+            task_definition = \
+                ecs_service_description['services'][0]['taskDefinition']
 
-        app.close(1)
+            print('AWS: Service {0}, Count {1}, '
+                  'Active Task Definition {2}'.format(resource,
+                                                      desired_count,
+                                                      task_definition))
+
+            # ADD COUNT INFORMATION TO DICTIONARY
+            service['desired_count'] = \
+                ecs_service_description['services'][0]['desiredCount']
+            service['running_count'] = \
+                ecs_service_description['services'][0]['runningCount']
+
+            # ADD LAUNCH TYPE INFORMATION TO DICTIONARY
+            service['launch_type'] = \
+                ecs_service_description['services'][0]['launchType']
+
+            # DESCRIBE TASK DEFINITIONS
+            ecs_task_description = ecs.describe_task_definition(
+                ecs_client,
+                ecs_service_description['services'][0]['taskDefinition']
+            )
+
+            # ADD VERSION ITEM TO DICTIONARY
+            service['version'] = ecs_task_description['taskDefinition']\
+                ['containerDefinitions'][0]['image'].split(':', 1)[-1]
+
+            # APPEND DICTIONARY ITEMS TO ARRAY
+            ecs_services.append(service)
 
     return ecs_services
 
 
-def default_command(app):
-    app.log.error('A namespace must be specified use "--help" to see all options')
-    app.close(1)
+def execute():
 
+    settings.init()
 
-def list_command(app):
-    app.log.info('Running list command')
-    app.config.parse_file(app.pargs.config)
+    # IF AWS IS ENABLED
+    if settings.config['aws']['enabled']:
 
-    ecs_services = list_helper(
-        app=app,
-        aws_auth_type=app.config.get_section_dict('aws')['auth']['type'],
-        aws_enabled=app.config.get_section_dict('aws')['enabled'],
-        aws_profile_names=app.config.get_section_dict('aws')['auth']['profile names'],
-        aws_regions=app.config.get_section_dict('aws')['regions']
-    )
+        logging.info('AWS: Enabled')
 
-    # APPLY FILTERING
-    ecs_services = mod_str.filter_dictionary(app, ecs_services)
+        ecs_services = []
 
-    # APPLY REPLACEMENTS
-    ecs_services = mod_str.replace_dictionary(app, ecs_services)
+        # IF AWS AUTH TYPE IS PROFILE CALL aws_auth_profile() FUNCTION
+        if settings.config['aws']['auth']['type'] == 'profile':
 
-    # PRINT OUTPUTS
-    output.main(app, ecs_services)
+            logging.info('AWS: Using profile authentication')
 
+            # FOR EACH PROFILE
+            for aws_profile_name in \
+                    settings.config['aws']['auth']['profile names']:
 
-def compare_command(app):
-    app.log.info('Running compare command')
-    app.config.parse_file(app.pargs.config)
+                print('AWS: Trying to auth with profile {0}'
+                      .format(aws_profile_name))
 
-    source_services = list_helper(
-        app=app,
-        aws_auth_type=app.config.get_section_dict('source')['aws']['auth']['type'],
-        aws_enabled=app.config.get_section_dict('source')['aws']['enabled'],
-        aws_profile_names=app.config.get_section_dict('source')['aws']['auth']['profile names'],
-        aws_regions=app.config.get_section_dict('source')['aws']['regions']
-    )
+                # IF NO REGIONS ARE SPECIFIED FETCH ALL
+                if len(settings.config['aws']['regions']) == 0:
 
-    destination_services = list_helper(
-        app=app,
-        aws_auth_type=app.config.get_section_dict('destination')['aws']['auth']['type'],
-        aws_enabled=app.config.get_section_dict('destination')['aws']['enabled'],
-        aws_profile_names=app.config.get_section_dict('destination')['aws']['auth']['profile names'],
-        aws_regions=app.config.get_section_dict('destination')['aws']['regions']
-    )
+                    # APPLY FILTERING
+                    ecs_services = mod_str.filter_dictionary(app,
+                                                             ecs_services)
+
+                    # APPLY REPLACEMENTS
+                    ecs_services = mod_str.replace_dictionary(app,
+                                                              ecs_services)
+
+                    ecs_client = aws.profile_client(aws_profile_name,
+                                                    ecs_region,
+                                                    'ecs')
+
+                    aws_services = aws_caller(ecs_client,
+                                              ecs_services)
+                else:
+
+                    # FOR EACH REGION
+                    for ecs_region in settings.config['aws']['regions']:
+                        ecs_client = aws.profile_client(aws_profile_name,
+                                                        ecs_region,
+                                                        'ecs')
+                        aws_services = aws_caller(ecs_client, ecs_services)
+
+                # IF OUTPUT IS ENABLED
+                if settings.config['output']['enabled']:
+
+                    # IF OUTPUT TYPE IS TABLE
+                    if settings.config['output']['type'] == 'table':
+
+                        table.basic_table(aws_services)
+
+        # IF AWS AUTH TYPE IS DEFAULT
+        elif settings.config['aws']['auth']['type'] == 'default':
+
+            logging.info('AWS: Using default authentication')
+
+            # IF NO REGIONS ARE SPECIFIED FETCH ALL
+            if len(settings.config['aws']['regions']) == 0:
+
+                logging.info('AWS: Regions is empty, fetching all regions')
+
+                # FOR EACH REGION
+                for ecs_region in aws.list_regions('ecs'):
+
+                    ecs_client = aws.default_client(ecs_region, 'ecs')
+
+                    aws_services = aws_caller(ecs_client, ecs_services)
+            else:
+
+                # FOR EACH REGION
+                for ecs_region in settings.config['aws']['regions']:
+
+                    ecs_client = aws.default_client(ecs_region, 'ecs')
+
+                    aws_services = aws_caller(ecs_client, ecs_services)
+
+            # IF OUTPUT IS ENABLED
+            if settings.config['output']['enabled']:
+
+                logging.info('OUTPUT: Output enabled')
+
+                # IF OUTPUT TYPE IS TABLE
+                if settings.config['output']['type'] == 'table':
+
+                    logging.info('OUTPUT: Table output enabled')
+
+                    table.basic_table(aws_services)
+                else:
+                    logging.error('OUTPUT: No valid output type selected')
+        else:
+            logging.error('AWS: Could not determine auth type')
+    else:
+        logging.error('MAIN: Nothing is enabled')
 
     # APPLY FILTERING
     source_services = mod_str.filter_dictionary(app, source_services)
@@ -99,12 +183,14 @@ def compare_command(app):
 
     # APPLY REPLACEMENTS
     source_services = mod_str.replace_dictionary(app, source_services)
-    destination_services = mod_str.replace_dictionary(app, destination_services)
+    destination_services = mod_str.replace_dictionary(app,
+                                                      destination_services)
 
     # APPLY REGEXES
     source_services = mod_str.regex_dictionary(app, source_services)
     destination_services = mod_str.regex_dictionary(app, destination_services)
 
-    diff_services = mod_str.same_dictionary(source_services, destination_services)
+    diff_services = mod_str.same_dictionary(source_services,
+                                            destination_services)
 
     output.compare_table(diff_services, 'html_table')

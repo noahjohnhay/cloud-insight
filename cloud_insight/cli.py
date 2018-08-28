@@ -1,4 +1,6 @@
-#!/usr/bin/python
+"""Manages CLI commands through the Cement Framework and executes
+   cloud insight from here.
+"""
 
 from cement.core.foundation import CementApp
 from cement.core.controller import CementBaseController, expose
@@ -8,12 +10,13 @@ import cloud_insight.executor as executor
 class BaseController(CementBaseController):
     class Meta:
         label = 'base'
-        description = "Simplifies the tracking of docker container versions, " \
-                      "health and other important information across various platforms."
+        description = "Simplifies the tracking of docker container " \
+                      "versions, health and other important information " \
+                      "across various platforms."
         arguments = [
             (['-c', '--config'],
              dict(action='store', help='Path to configuration file to use'))
-            ]
+        ]
 
     @expose(hide=True)
     def default(self):

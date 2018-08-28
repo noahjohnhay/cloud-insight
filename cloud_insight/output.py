@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 import plotly
 from prettytable import PrettyTable
 
@@ -81,11 +79,13 @@ def html_table(services):
                     '#F5F4F4',
                     '#F5F4F4',
                     [
-                        '#24F015' if service['desired_count'] == service['running_count'] \
+                        '#24F015' if service['desired_count'] \
+                        == service['running_count'] \
                         else '#DA100C' for service in services
                     ],
                     [
-                        '#24F015' if service['desired_count'] == service['running_count'] \
+                        '#24F015' if service['desired_count'] \
+                        == service['running_count'] \
                         else '#DA100C' for service in services
                     ],
                     '#F5F4F4',
@@ -204,11 +204,13 @@ def compare_table(services, output_type):
                     color=[
                         '#F5F4F4',
                         [
-                            '#24F015' if service['source_version'] == service['destination_version'] \
+                            '#24F015' if service['source_version'] \
+                            == service['destination_version'] \
                             else '#DA100C' for service in services
                         ],
                         [
-                            '#24F015' if service['source_version'] == service['destination_version'] \
+                            '#24F015' if service['source_version'] \
+                            == service['destination_version'] \
                             else '#DA100C' for service in services
                         ]
                     ]

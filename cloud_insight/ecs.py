@@ -50,7 +50,11 @@ def service_dictionary(app, ecs_client, ecs_services):
         )
 
         # ITERATE THROUGH SERVICES IN EACH CLUSTER
-        for ecs_service in list_services(app, ecs_client, aws.parse_arn(ecs_cluster)['resource']):
+
+        for ecs_service in \
+                list_services(app,
+                              ecs_client,
+                              aws.parse_arn(ecs_cluster)['resource']):
 
             # CREATE SERVICE DICTIONARY
             service = dict()
@@ -73,19 +77,25 @@ def service_dictionary(app, ecs_client, ecs_services):
                 aws.parse_arn(ecs_cluster)['resource']
             )
 
-            # PRINT SERVICE DESCRIPTION
-            app.log.info('AWS: Service {0}, Count {1}, Active Task Definition {2}'.format(
-                aws.parse_arn(ecs_service)['resource'],
-                ecs_service_description['services'][0]['desiredCount'],
-                ecs_service_description['services'][0]['taskDefinition'])
-            )
+            resource = aws.parse_arn(ecs_service)['resource']
+            count = ecs_service_description['services'][0]['desiredCount']
+            definition = \
+                ecs_service_description['services'][0]['taskDefinition']
+
+            app.log.info('AWS: Service {0}, Count {1},'
+                         ' Active Task Definition {2}'.format(resource,
+                                                              count,
+                                                              definition))
 
             # ADD COUNT INFORMATION TO DICTIONARY
-            service['desired_count'] = ecs_service_description['services'][0]['desiredCount']
-            service['running_count'] = ecs_service_description['services'][0]['runningCount']
+            service['desired_count'] = \
+                ecs_service_description['services'][0]['desiredCount']
+            service['running_count'] = \
+                ecs_service_description['services'][0]['runningCount']
 
             # ADD LAUNCH TYPE INFORMATION TO DICTIONARY
-            service['launch_type'] = ecs_service_description['services'][0]['launchType']
+            service['launch_type'] = \
+                ecs_service_description['services'][0]['launchType']
 
             # DESCRIBE TASK DEFINITIONS
             ecs_task_description = describe_task_definition(
@@ -93,9 +103,9 @@ def service_dictionary(app, ecs_client, ecs_services):
                 ecs_service_description['services'][0]['taskDefinition']
             )
 
-            # ADD VERSION ITEM TO DICTIONARY
             service['version'] = \
-                ecs_task_description['taskDefinition']['containerDefinitions'][0]['image'].split(':', 1)[-1]
+                ecs_task_description['taskDefinition'] \
+                ['containerDefinitions'][0]['image'].split(':', 1)[-1]
 
             # APPEND DICTIONARY ITEMS TO ARRAY
             ecs_services.append(service)
