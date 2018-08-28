@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import packages.aws as aws
+import cloud_insight.aws as aws
 
 
 # LIST CLUSTERS

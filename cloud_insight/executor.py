@@ -1,8 +1,9 @@
 #!/usr/bin/python
 
-import packages.aws as aws
-import packages.ecs as ecs
-import packages.output as output
+import cloud_insight.aws as aws
+import cloud_insight.ecs as ecs
+import mod_str as mod_str
+import cloud_insight.output as output
 
 
 def list_helper(app, aws_auth_type, aws_enabled, aws_profile_names, aws_regions):
@@ -63,10 +64,10 @@ def list_command(app):
     )
 
     # APPLY FILTERING
-    ecs_services = output.filter_dict(app, ecs_services)
+    ecs_services = mod_str.filter_dictionary(app, ecs_services)
 
     # APPLY REPLACEMENTS
-    ecs_services = output.replace_dictionary(app, ecs_services)
+    ecs_services = mod_str.replace_dictionary(app, ecs_services)
 
     # PRINT OUTPUTS
     output.main(app, ecs_services)
@@ -93,12 +94,17 @@ def compare_command(app):
     )
 
     # APPLY FILTERING
-    source_services = output.filter_dict(app, source_services)
-    destination_services = output.filter_dict(app, destination_services)
+    source_services = mod_str.filter_dictionary(app, source_services)
+    destination_services = mod_str.filter_dictionary(app, destination_services)
 
     # APPLY REPLACEMENTS
-    source_services = output.replace_dictionary(app, source_services)
-    destination_services = output.replace_dictionary(app, destination_services)
+    source_services = mod_str.replace_dictionary(app, source_services)
+    destination_services = mod_str.replace_dictionary(app, destination_services)
 
-    print (source_services)
-    print (destination_services)
+    # APPLY REGEXES
+    source_services = mod_str.regex_dictionary(app, source_services)
+    destination_services = mod_str.regex_dictionary(app, destination_services)
+
+    diff_services = mod_str.same_dictionary(source_services, destination_services)
+
+    output.compare_table(diff_services, 'html_table')

@@ -2,7 +2,7 @@
 
 from cement.core.foundation import CementApp
 from cement.core.controller import CementBaseController, expose
-import packages.executor as executor
+import cloud_insight.executor as executor
 
 
 class BaseController(CementBaseController):
