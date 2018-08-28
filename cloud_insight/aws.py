@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 import boto3
 
 
@@ -13,7 +11,10 @@ def list_regions(service):
 
 
 # CREATE ALL CLIENTS
-def all_clients(app, auth_type, aws_service, aws_profile_names=None, aws_regions=None):
+def all_clients(
+        app, auth_type, aws_service,
+        aws_profile_names=None, aws_regions=None):
+
     clients = []
     if aws_regions is None:
         app.log.info('AWS: Regions is empty, fetching all regions')
@@ -63,7 +64,8 @@ def profile_client(app, profile_name, region, service):
         service,
         region_name=region
     )
-    app.log.info('AWS: Trying to auth with profile {0} in region {1}'.format(profile_name, region))
+    app.log.info('AWS: Trying to auth with profile {0} '
+                 'in region {1}'.format(profile_name, region))
     return client
 
 
@@ -80,7 +82,11 @@ def parse_arn(arn):
         'resource_type': None
     }
     if '/' in result['resource']:
-        result['resource_type'], result['resource'] = result['resource'].split('/', 1)
+        result['resource_type'],
+        result['resource'] = result['resource'].split('/', 1)
+
     elif ':' in result['resource']:
-        result['resource_type'], result['resource'] = result['resource'].split(':', 1)
+        result['resource_type'],
+        result['resource'] = result['resource'].split(':', 1)
+
     return result

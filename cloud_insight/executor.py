@@ -15,7 +15,9 @@ def aws_caller(ecs_client, ecs_services):
         )
 
         # ITERATE THROUGH SERVICES IN EACH CLUSTER
-        for ecs_service in ecs.list_services(ecs_client, aws.parse_arn(ecs_cluster)['resource']):
+        for ecs_service in \
+                ecs.list_services(ecs_client,
+                                  aws.parse_arn(ecs_cluster)['resource']):
 
             # CREATE SERVICE DICTIONARY
             service = dict()
@@ -38,19 +40,26 @@ def aws_caller(ecs_client, ecs_services):
                 aws.parse_arn(ecs_cluster)['resource']
             )
 
-            # PRINT SERVICE DESCRIPTION
-            print('AWS: Service {0}, Count {1}, Active Task Definition {2}'.format(
-                aws.parse_arn(ecs_service)['resource'],
-                ecs_service_description['services'][0]['desiredCount'],
-                ecs_service_description['services'][0]['taskDefinition'])
-            )
+            resource = aws.parse_arn(ecs_service)['resource']
+            desired_count = \
+                ecs_service_description['services'][0]['desiredCount']
+            task_definition = \
+                ecs_service_description['services'][0]['taskDefinition']
+
+            print('AWS: Service {0}, Count {1}, '
+                  'Active Task Definition {2}'.format(resource,
+                                                      desired_count,
+                                                      task_definition))
 
             # ADD COUNT INFORMATION TO DICTIONARY
-            service['desired_count'] = ecs_service_description['services'][0]['desiredCount']
-            service['running_count'] = ecs_service_description['services'][0]['runningCount']
+            service['desired_count'] = \
+                ecs_service_description['services'][0]['desiredCount']
+            service['running_count'] = \
+                ecs_service_description['services'][0]['runningCount']
 
             # ADD LAUNCH TYPE INFORMATION TO DICTIONARY
-            service['launch_type'] = ecs_service_description['services'][0]['launchType']
+            service['launch_type'] = \
+                ecs_service_description['services'][0]['launchType']
 
             # DESCRIBE TASK DEFINITIONS
             ecs_task_description = ecs.describe_task_definition(
@@ -59,8 +68,8 @@ def aws_caller(ecs_client, ecs_services):
             )
 
             # ADD VERSION ITEM TO DICTIONARY
-            service['version'] = ecs_task_description \
-                ['taskDefinition']['containerDefinitions'][0]['image'].split(':', 1)[-1]
+            service['version'] = ecs_task_description['taskDefinition']\
+                ['containerDefinitions'][0]['image'].split(':', 1)[-1]
 
             # APPEND DICTIONARY ITEMS TO ARRAY
             ecs_services.append(service)
@@ -85,29 +94,36 @@ def execute():
             logging.info('AWS: Using profile authentication')
 
             # FOR EACH PROFILE
-            for aws_profile_name in settings.config['aws']['auth']['profile names']:
+            for aws_profile_name in \
+                    settings.config['aws']['auth']['profile names']:
 
-                print('AWS: Trying to auth with profile {0}'.format(aws_profile_name))
+                print('AWS: Trying to auth with profile {0}'
+                      .format(aws_profile_name))
 
                 # IF NO REGIONS ARE SPECIFIED FETCH ALL
                 if len(settings.config['aws']['regions']) == 0:
 
-    # APPLY FILTERING
-    ecs_services = mod_str.filter_dictionary(app, ecs_services)
+                    # APPLY FILTERING
+                    ecs_services = mod_str.filter_dictionary(app,
+                                                             ecs_services)
 
-    # APPLY REPLACEMENTS
-    ecs_services = mod_str.replace_dictionary(app, ecs_services)
+                    # APPLY REPLACEMENTS
+                    ecs_services = mod_str.replace_dictionary(app,
+                                                              ecs_services)
 
-                        ecs_client = aws.profile_client(aws_profile_name, ecs_region, 'ecs')
+                    ecs_client = aws.profile_client(aws_profile_name,
+                                                    ecs_region,
+                                                    'ecs')
 
-                        aws_services = aws_caller(ecs_client, ecs_services)
+                    aws_services = aws_caller(ecs_client,
+                                              ecs_services)
                 else:
 
                     # FOR EACH REGION
                     for ecs_region in settings.config['aws']['regions']:
-
-                        ecs_client = aws.profile_client(aws_profile_name, ecs_region, 'ecs')
-
+                        ecs_client = aws.profile_client(aws_profile_name,
+                                                        ecs_region,
+                                                        'ecs')
                         aws_services = aws_caller(ecs_client, ecs_services)
 
                 # IF OUTPUT IS ENABLED
@@ -167,13 +183,14 @@ def execute():
 
     # APPLY REPLACEMENTS
     source_services = mod_str.replace_dictionary(app, source_services)
-    destination_services = mod_str.replace_dictionary(app, destination_services)
+    destination_services = mod_str.replace_dictionary(app,
+                                                      destination_services)
 
     # APPLY REGEXES
     source_services = mod_str.regex_dictionary(app, source_services)
     destination_services = mod_str.regex_dictionary(app, destination_services)
 
-    diff_services = mod_str.same_dictionary(source_services, destination_services)
+    diff_services = mod_str.same_dictionary(source_services,
+                                            destination_services)
 
     output.compare_table(diff_services, 'html_table')
-
