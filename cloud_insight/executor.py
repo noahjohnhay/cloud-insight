@@ -1,11 +1,7 @@
-#!/usr/bin/python
-
-import logging
-import packages.aws as aws
-import packages.ecs as ecs
-import packages.settings as settings
-import packages.table as table
-import packages.asg as asg
+import cloud_insight.aws as aws
+import cloud_insight.ecs as ecs
+import mod_str as mod_str
+import cloud_insight.output as output
 
 
 def aws_caller(ecs_client, ecs_services):
@@ -96,10 +92,11 @@ def execute():
                 # IF NO REGIONS ARE SPECIFIED FETCH ALL
                 if len(settings.config['aws']['regions']) == 0:
 
-                    logging.info('AWS: Regions is empty, fetching all regions')
+    # APPLY FILTERING
+    ecs_services = mod_str.filter_dictionary(app, ecs_services)
 
-                    # FOR EACH REGION
-                    for ecs_region in aws.list_regions('ecs'):
+    # APPLY REPLACEMENTS
+    ecs_services = mod_str.replace_dictionary(app, ecs_services)
 
                         ecs_client = aws.profile_client(aws_profile_name, ecs_region, 'ecs')
 
@@ -164,5 +161,19 @@ def execute():
     else:
         logging.error('MAIN: Nothing is enabled')
 
+    # APPLY FILTERING
+    source_services = mod_str.filter_dictionary(app, source_services)
+    destination_services = mod_str.filter_dictionary(app, destination_services)
 
+    # APPLY REPLACEMENTS
+    source_services = mod_str.replace_dictionary(app, source_services)
+    destination_services = mod_str.replace_dictionary(app, destination_services)
+
+    # APPLY REGEXES
+    source_services = mod_str.regex_dictionary(app, source_services)
+    destination_services = mod_str.regex_dictionary(app, destination_services)
+
+    diff_services = mod_str.same_dictionary(source_services, destination_services)
+
+    output.compare_table(diff_services, 'html_table')
 

@@ -145,45 +145,88 @@ def cli_table(services):
     return
 
 
-def filter_dict(app, services):
+def compare_table(services, output_type):
 
-    # CHECK IF THERE ARE ANY FILTERS
-    if 'filter' in app.config.get_section_dict('output'):
+    if output_type == 'cli_table':
+        # INITIALIZE TABLE
+        table = PrettyTable()
 
-        app.log.info('OUTPUT: Filtering enabled')
+        # DESCRIBE TABLE HEADERS
+        table.field_names = [
+            'Name',
+            'Source Version',
+            'Destination Version',
+        ]
 
-        # FOR EACH FILTER KEY
-        for filter_key in app.config.get_section_dict('output')['filter']:
+        # ALIGN COLUMNS
+        table.align['Name'] = 'l'
+        table.align['Source Version'] = 'l'
+        table.align['Destination Version'] = 'l'
 
-            # ASSIGN THE VALUES FROM THE FILTER KEY TO VARIABLE
-            filter_list = app.config.get_section_dict('output')['filter'][filter_key]
-
-            # FILTER DICTIONARY BASED ON FILTER KEY & FILTER LIST
-            services = [
-                d for d in services if d[filter_key] in filter_list
-            ]
-
-    return services
-
-
-def replace_dictionary(app, services):
-
-    if 'replace' in app.config.get_section_dict('output'):
-
-        app.log.info('OUTPUT: Replacing enabled')
-
-        # ITERATE THROUGH EACH SERVICE DICTIONARY
+        # INSERT DATA INTO TABLE
         for service in services:
+            table.add_row([
+                service['service'],
+                service['source_version'],
+                service['destination_version'],
+            ])
 
-            # FOR EACH REPLACE KEY (ex: 'service', 'cluster')
-            for replace_key in app.config.get_section_dict('output')['replace']:
+        # PRINT TABLE
+        print(table)
+    elif output_type == 'html_table':
 
-                # FETCH DICTIONARY OF REPLACEMENTS
-                replace_dict = app.config.get_section_dict('output')['replace'][replace_key]
+        # DESCRIBE TABLE
+        trace = plotly.graph_objs.Table(
+            # DESCRIBE TABLE HEADERS
+            columnwidth=[
+                100,
+                100,
+                100
+            ],
+            header=dict(
+                values=[
+                    'Name',
+                    'Source Version',
+                    'Destination Version'
+                ],
+                fill=dict(
+                    color='#a1c3d1'
+                )
+            ),
+            # DESCRIBE TABLE CONTENTS
+            cells=dict(
+                values=[
+                    [service['service'] for service in services],
+                    [service['source_version'] for service in services],
+                    [service['destination_version'] for service in services]
+                ],
+                fill=dict(
+                    color=[
+                        '#F5F4F4',
+                        [
+                            '#24F015' if service['source_version'] == service['destination_version'] \
+                            else '#DA100C' for service in services
+                        ],
+                        [
+                            '#24F015' if service['source_version'] == service['destination_version'] \
+                            else '#DA100C' for service in services
+                        ]
+                    ]
+                ),
+                align=[
+                    'left',
+                    'left',
+                    'left'
+                ]
+            )
+        )
 
-                # ITERATE THROUGH REPLACEMENTS
-                for item in replace_dict.keys():
+        data = [trace]
 
-                    service[replace_key] = service[replace_key].replace(item, replace_dict[item])
+        # OUTPUT TABLE TO HTML FILE
+        plotly.offline.plot(data, filename='../basic_table.html')
+    else:
 
-    return services
+        print('SOMETHING WENT WRONG')
+
+    return
