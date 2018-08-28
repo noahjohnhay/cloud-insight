@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 import re
 
 
@@ -14,7 +12,8 @@ def filter_dictionary(app, services):
         for filter_key in app.config.get_section_dict('output')['filter']:
 
             # ASSIGN THE VALUES FROM THE FILTER KEY TO VARIABLE
-            filter_list = app.config.get_section_dict('output')['filter'][filter_key]
+            filter_list = \
+                app.config.get_section_dict('output')['filter'][filter_key]
 
             # FILTER DICTIONARY BASED ON FILTER KEY & FILTER LIST
             services = [
@@ -38,13 +37,18 @@ def regex_dictionary(app, services):
             for regex_key in app.config.get_section_dict('output')['regex']:
 
                 # FETCH DICTIONARY OF REGEXES
-                regex_dict = app.config.get_section_dict('output')['regex'][regex_key]
+                regex_dict = \
+                    app.config.get_section_dict('output')['regex'][regex_key]
 
                 # ITERATE THROUGH REGEXES
                 for item in regex_dict.keys():
 
                     # ATTEMPT TO RUN REGEX AGAINST STRING
-                    service[regex_key] = re.sub(item, regex_dict[item], service[regex_key])
+                    service[regex_key] = re.sub(
+                        item,
+                        regex_dict[item],
+                        service[regex_key]
+                    )
 
     return services
 
@@ -60,16 +64,20 @@ def replace_dictionary(app, services):
         for service in services:
 
             # FOR EACH REPLACE KEY (ex: 'service', 'cluster')
-            for replace_key in app.config.get_section_dict('output')['replace']:
+            for replace_key in \
+                    app.config.get_section_dict('output')['replace']:
 
                 # FETCH DICTIONARY OF REPLACEMENTS
-                replace_dict = app.config.get_section_dict('output')['replace'][replace_key]
+                replace_dict = \
+                    app.config. \
+                    get_section_dict('output')['replace'][replace_key]
 
                 # ITERATE THROUGH REPLACEMENTS
                 for item in replace_dict.keys():
 
                     # ATTEMPT TO REPLACE ITEM IN STRING
-                    service[replace_key] = service[replace_key].replace(item, replace_dict[item])
+                    service[replace_key] = \
+                        service[replace_key].replace(item, replace_dict[item])
 
     return services
 
