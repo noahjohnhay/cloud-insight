@@ -1,0 +1,37 @@
+{
+  "source": {
+    "aws": {
+      "enabled": true,
+      "regions": {
+        "us-east-1": []
+      },
+      "auth": {
+        "type": "profile",
+        "profile names": [
+          "staging-profile"
+        ]
+      }
+    }
+  },
+  "destination": {
+    "aws": {
+      "enabled": true,
+      "regions": {
+        "us-east-1": []
+      },
+      "auth": {
+        "type": "profile",
+        "profile names": [
+          "production-profile"
+        ]
+      }
+    }
+  },
+  "output": {
+    "enabled": true,
+    "type": "cli_table",
+    "replace": {
+      "service": {"production": "", "staging": ""}
+    }
+  }
+}

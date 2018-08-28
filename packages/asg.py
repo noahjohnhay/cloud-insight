@@ -2,8 +2,8 @@
 
 
 # DESCRIBE ALL AUTO SCALING GROUPS
-def describe_auto_scaling_groups(client):
-    print("Listing Auto Scaling Groups")
+def describe_auto_scaling_groups(app, client):
+    app.log.info('AWS: Listing Auto Scaling Groups')
     paginator = client.get_paginator('describe_auto_scaling_groups')
     page_iterator = paginator.paginate()
     auto_scaling_groups = []
@@ -33,12 +33,3 @@ def auto_scaling_groups_instance_ids(auto_scaling_groups):
     instances = auto_scaling_groups_instances(auto_scaling_groups)
     instance_ids = auto_scaling_group_instance_ids(instances)
     return instance_ids
-
-
-# # GET INSTANCE IDS FROM AUTO SCALING GROUP
-# def jon(auto_scaling_groups):
-#     instances = auto_scaling_groups_instances(auto_scaling_groups)
-#     instance_ids = []
-#     for instance in instances:
-#         instance_ids.append(instance["InstanceId"])
-#     return instance_ids

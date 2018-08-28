@@ -1,9 +1,5 @@
-import io
 import os
-import sys
-from shutil import rmtree
-
-from setuptools import find_packages, setup, Command
+from setuptools import find_packages, setup
 
 # Package meta-data.
 NAME = 'cloud-insight'
@@ -17,14 +13,15 @@ here = os.path.abspath(os.path.dirname(__file__))
 
 REQUIRED = [
     'boto3',
-    'python-consul',
-    'plotly',
+    'colorlog',
     'cement',
+    'plotly',
+    'PrettyTable'
 ]
 
 setup(
     name=NAME,
-    version='0.0.2',
+    version='1.0.0',
     description=DESCRIPTION,
     author=AUTHOR,
     author_email=EMAIL,
@@ -43,13 +40,7 @@ setup(
         'Programming Language :: Python',
         'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy'
-    ],
-
+    ]
 )

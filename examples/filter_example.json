@@ -1,0 +1,20 @@
+{
+  "aws": {
+    "enabled": true,
+    "regions": {
+      "us-east-1": []
+    },
+    "auth": {
+      "type": "default"
+    }
+  },
+  "output": {
+    "enabled": true,
+    "type": "cli_table",
+    "filter": {
+      "cluster": [
+        "example"
+      ]
+    }
+  }
+}

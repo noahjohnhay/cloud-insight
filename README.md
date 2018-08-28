@@ -1,11 +1,45 @@
-# NEEDS A NEW NAME
+# CLOUD-INSIGHT
 This is a project designed to simplify the tracking of docker container versions, health and other important information across various platforms.
 
-## Installation
+## Running
+
+#### CLI
+
+[PyPI](https://pypi.org/project/cloud-insight/ "PyPI")
 
 ```
-pip install python-consul boto3 plotly
+pip install cloud-inisight
 ```
+
+```
+cloud-insight --help
+cloud-insight list --config "path/to/config.json"
+```
+
+#### DOCKER
+![alt text](https://img.shields.io/docker/pulls/noahjohnhay/cloud-insight.svg "Docker Pulls")
+![alt text](https://img.shields.io/docker/stars/noahjohnhay/cloud-insight.svg "Docker Stars")
+
+[Docker Hub](https://hub.docker.com/r/noahjohnhay/cloud-insight/ "Docker Hub")
+
+```
+docker run  \
+-v absolute/path/to/.aws:/root/.aws:ro \
+-v .:/project \
+cloud-insight:1.0.0 list \
+-config "/project/relative/path/to/config"
+```
+
+### Commands
+
+##### List
+Builds an array of dictionaries consisting of various important pieces of information such as;
+* Service Name
+* Version
+* Desired Count
+* Actual Count
+* Cluster Name
+* Cluster Type
 
 ## Configuration
 
@@ -54,14 +88,46 @@ Consul is not currently functional
 
 ### Output
 
+###### Enabled
+Whether or not to enable an output
+
+```
+enabled: true
+```
+
+##### HTML Table
+An HTML formatted table using Plotly
+```
+type: "html_table"
+```
+
+![Alt text](examples/html_table.png?raw=true "Basic Table")
+
+##### CLI Table
+A CLI Table using PrettyTable
+
+```
+type: "cli_table"
+```
+##### Example
+
 ```
 "output": {
   "enabled": true,
-  "type": "table"
+  "type": "html_table"
 }
 ```
 
-![Alt text](examples/basic_table.png?raw=true "Basic Table")
+##### Filters
+Filtering the results
+
+```
+"filters": {
+      "cluster": [
+        "example"
+      ]
+    }
+```
 
 ## Examples
 

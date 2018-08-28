@@ -1,4 +1,6 @@
 boto3
-python-consul
+cement==2.10.12
+colorlog
+docker
 plotly
-cement
+PrettyTable
