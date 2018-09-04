@@ -1,5 +1,5 @@
 boto3
-cement
+cement==2.10.12
 colorlog
 docker
 plotly

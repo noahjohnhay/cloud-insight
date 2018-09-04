@@ -1,5 +1,7 @@
 language: python
 python:
-- "2.7"
+- '2.7'
 install:
-  - python setup.py
+- pip install tox-travis
+script:
+- tox
