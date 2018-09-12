@@ -6,7 +6,7 @@ import mod_str as mod_str
 import cloud_insight.output as output
 
 
-def list_helper(app, aws_auth_type, aws_enabled, aws_profile_names, aws_regions):
+def list_helper(app, aws_auth_type, aws_enabled, aws_regions, list_type=None):
 
     # CREATE EMPTY ARRAY
     ecs_services = []
@@ -21,6 +21,23 @@ def list_helper(app, aws_auth_type, aws_enabled, aws_profile_names, aws_regions)
 
             # SET AWS PROFILE NAMES TO NONE
             aws_profile_names = None
+
+        elif list_type == 'default':
+
+            aws_profile_names = app.config.get_section_dict('aws')['auth']['profile names']
+
+        elif list_type == 'source':
+
+            aws_profile_names = app.config.get_section_dict('source')['aws']['auth']['profile names']
+
+        elif list_type == 'destination':
+
+            aws_profile_names = app.config.get_section_dict('destination')['aws']['auth']['profile names']
+
+        else:
+            aws_profile_names = None
+            app.log.error('list helper error occurred')
+            app.close(1)
 
         # ITERATE THROUGH ALL CREATED CLIENTS
         for ecs_client in aws.all_clients(
@@ -59,8 +76,8 @@ def list_command(app):
         app=app,
         aws_auth_type=app.config.get_section_dict('aws')['auth']['type'],
         aws_enabled=app.config.get_section_dict('aws')['enabled'],
-        aws_profile_names=app.config.get_section_dict('aws')['auth']['profile names'],
-        aws_regions=app.config.get_section_dict('aws')['regions']
+        aws_regions=app.config.get_section_dict('aws')['regions'],
+        list_type='default'
     )
 
     # APPLY FILTERING
@@ -81,16 +98,16 @@ def compare_command(app):
         app=app,
         aws_auth_type=app.config.get_section_dict('source')['aws']['auth']['type'],
         aws_enabled=app.config.get_section_dict('source')['aws']['enabled'],
-        aws_profile_names=app.config.get_section_dict('source')['aws']['auth']['profile names'],
-        aws_regions=app.config.get_section_dict('source')['aws']['regions']
+        aws_regions=app.config.get_section_dict('source')['aws']['regions'],
+        list_type='source'
     )
 
     destination_services = list_helper(
         app=app,
         aws_auth_type=app.config.get_section_dict('destination')['aws']['auth']['type'],
         aws_enabled=app.config.get_section_dict('destination')['aws']['enabled'],
-        aws_profile_names=app.config.get_section_dict('destination')['aws']['auth']['profile names'],
-        aws_regions=app.config.get_section_dict('destination')['aws']['regions']
+        aws_regions=app.config.get_section_dict('destination')['aws']['regions'],
+        list_type='destination'
     )
 
     # APPLY FILTERING
