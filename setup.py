@@ -31,7 +31,7 @@ setup(
     url=URL,
     packages=find_packages(exclude=('tests',)),
     entry_points={
-         'console_scripts': ['cloud-insight=packages.cli:main'],
+         'console_scripts': ['cloud-insight=cloud_insight.cli:main'],
      },
     install_requires=REQUIRED,
     include_package_data=True,
