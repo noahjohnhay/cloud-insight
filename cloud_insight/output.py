@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
-import plotly
+from plotly.offline import plot
+import plotly.graph_objs as go
 from prettytable import PrettyTable
 
 
@@ -43,7 +44,7 @@ def main(app, services):
 def html_table(services):
 
     # DESCRIBE TABLE
-    trace = plotly.graph_objs.Table(
+    trace = go.graph_objs.Table(
         # DESCRIBE TABLE HEADERS
         columnwidth=[
             100,
@@ -106,7 +107,7 @@ def html_table(services):
     data = [trace]
 
     # OUTPUT TABLE TO HTML FILE
-    plotly.offline.plot(data, filename='../basic_table.html')
+    plot(data, filename='../basic_table.html')
 
     return
 
@@ -176,7 +177,7 @@ def compare_table(services, output_type):
     elif output_type == 'html_table':
 
         # DESCRIBE TABLE
-        trace = plotly.graph_objs.Table(
+        trace = go.graph_objs.Table(
             # DESCRIBE TABLE HEADERS
             columnwidth=[
                 100,
@@ -224,7 +225,7 @@ def compare_table(services, output_type):
         data = [trace]
 
         # OUTPUT TABLE TO HTML FILE
-        plotly.offline.plot(data, filename='../basic_table.html')
+        plot(data, filename='../basic_table.html')
     else:
 
         print('SOMETHING WENT WRONG')
