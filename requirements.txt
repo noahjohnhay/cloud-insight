@@ -2,5 +2,5 @@ boto3
 cement==2.10.12
 colorlog
 docker
-plotly
+plotly==2.7.0
 PrettyTable

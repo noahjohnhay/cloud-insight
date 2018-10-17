@@ -18,7 +18,7 @@ REQUIRED = [
     'boto3',
     'colorlog',
     'cement==2.10.12',
-    'plotly',
+    'plotly==2.7.0',
     'PrettyTable'
 ]
 
