@@ -82,8 +82,8 @@ def html_table(services):
                     '#F5F4F4',
                     '#F5F4F4',
                     [
-                        '#24F015' if service['desired_count'] == service['running_count'] \
-                        else '#DA100C' for service in services
+                        '#FFFF00' if service['desired_count'] == 0 \
+                        else '#24F015' for service in services
                     ],
                     [
                         '#24F015' if service['desired_count'] == service['running_count'] \
