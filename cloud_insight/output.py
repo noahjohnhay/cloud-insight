@@ -18,7 +18,7 @@ def main(app, services):
             app.log.info('OUTPUT: HTML table output enabled')
 
             # EXECUTE HTML TABLE FUNCTION
-            html_table(services)
+            html_table(app, services)
 
         # IF OUTPUT TYPE IS CLI TABLE
         elif app.config.get_section_dict('output')['type'] == 'cli_table':
@@ -41,7 +41,7 @@ def main(app, services):
     return
 
 
-def html_table(services):
+def html_table(app, services):
 
     # DESCRIBE TABLE
     trace = go.graph_objs.Table(
@@ -107,7 +107,10 @@ def html_table(services):
     data = [trace]
 
     # OUTPUT TABLE TO HTML FILE
-    plot(data, filename='../basic_table.html')
+    plot(
+        data,
+        filename=app.config.get_section_dict('output')['path']
+    )
 
     return
 
@@ -146,7 +149,7 @@ def cli_table(services):
     return
 
 
-def compare_table(services, output_type):
+def compare_table(app, services, output_type):
 
     if output_type == 'cli_table':
         # INITIALIZE TABLE
@@ -225,7 +228,10 @@ def compare_table(services, output_type):
         data = [trace]
 
         # OUTPUT TABLE TO HTML FILE
-        plot(data, filename='../basic_table.html')
+        plot(
+            data,
+            filename=app.config.get_section_dict('output')['path']
+        )
     else:
 
         print('SOMETHING WENT WRONG')
