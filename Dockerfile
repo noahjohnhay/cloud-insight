@@ -10,4 +10,6 @@ RUN chmod 777 -R /app
 
 VOLUME /root/.aws
 
+VOLUME /app
+
 ENTRYPOINT ["cloud-insight"]
