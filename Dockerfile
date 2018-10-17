@@ -6,6 +6,8 @@ COPY . /app
 
 RUN python setup.py install
 
+RUN chmod 777 -R /app
+
 VOLUME /root/.aws
 
 ENTRYPOINT ["cloud-insight"]
