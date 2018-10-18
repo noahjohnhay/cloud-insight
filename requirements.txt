@@ -4,3 +4,4 @@ colorlog
 docker
 plotly==2.7.0
 PrettyTable
+urllib3<=1.23
