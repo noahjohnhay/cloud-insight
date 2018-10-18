@@ -124,4 +124,4 @@ def compare_command(app):
 
     diff_services = mod_str.same_dictionary(source_services, destination_services)
 
-    output.compare_table(diff_services, 'html_table')
+    output.compare_table(app, diff_services, 'html_table')

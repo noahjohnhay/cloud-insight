@@ -1,6 +1,33 @@
 #!/usr/bin/python
 
 import cloud_insight.aws as aws
+import datetime
+
+
+# DESCRIBE SERVICES
+def describe_service(client, service_names, cluster_name):
+    service_description = client.describe_services(
+        cluster=cluster_name,
+        services=[service_names]
+    )
+    return service_description
+
+
+# DESCRIBE TASK
+def describe_task(client, cluster_name, task_id):
+    task_description = client.describe_tasks(
+        cluster=cluster_name,
+        tasks=[task_id]
+    )
+    return task_description
+
+
+# DESCRIBE TASK DEFINITION
+def describe_task_definition(client, task_definition_name):
+    task_definition_description = client.describe_task_definition(
+        taskDefinition=task_definition_name
+    )
+    return task_definition_description
 
 
 # LIST CLUSTERS
@@ -22,21 +49,34 @@ def list_services(app, client, cluster_name):
     return service_names
 
 
-# DESCRIBE SERVICES
-def describe_service(client, service_names, cluster_name):
-    service_description = client.describe_services(
+# LIST ALL TASKS IN A CLUSTER
+def list_tasks(client, cluster_name, service_name):
+    paginator = client.get_paginator('list_tasks')
+    page_iterator = paginator.paginate(
         cluster=cluster_name,
-        services=[service_names]
+        serviceName=service_name
     )
-    return service_description
+    tasks = []
+    for page in page_iterator:
+        tasks.extend(page['taskArns'])
+    return tasks
 
 
-# DESCRIBE TASK DEFINITION
-def describe_task_definition(client, task_name):
-    task_description = client.describe_task_definition(
-        taskDefinition=task_name
-    )
-    return task_description
+def get_uptime(client, cluster_name, service_name):
+
+    uptime_list = []
+
+    for task in list_tasks(client, cluster_name, service_name):
+
+        start_time = describe_task(client, cluster_name, task)['tasks'][0]['startedAt']
+
+        current_time = datetime.datetime.now(start_time.tzinfo)
+
+        uptime = ' {}'.format(current_time.replace(microsecond=0) - start_time.replace(microsecond=0))
+
+        uptime_list.append(uptime.replace(",", ""))
+
+    return uptime_list
 
 
 def service_dictionary(app, ecs_client, ecs_services):
@@ -71,6 +111,13 @@ def service_dictionary(app, ecs_client, ecs_services):
                 ecs_client,
                 aws.parse_arn(ecs_service)['resource'],
                 aws.parse_arn(ecs_cluster)['resource']
+            )
+
+            # GET ALL TASKS UPTIME
+            service['uptime'] = get_uptime(
+                ecs_client,
+                aws.parse_arn(ecs_cluster)['resource'],
+                aws.parse_arn(ecs_service)['resource']
             )
 
             # PRINT SERVICE DESCRIPTION

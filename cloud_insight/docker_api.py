@@ -29,7 +29,7 @@ def parse_image(image):
             'parsedName': split_name[0],
             'parsedVersion': split_name[1],
         }
-    except:
+    except Exception:
         result = {
             'dockerName': image,
             'parsedName': image,
