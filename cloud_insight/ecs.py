@@ -74,9 +74,9 @@ def get_uptime(app, client, cluster_name, service_name):
 
             current_time = datetime.datetime.now(start_time.tzinfo)
 
-            uptime = ' {}'.format(current_time.replace(microsecond=0) - start_time.replace(microsecond=0))
+            uptime = current_time.replace(microsecond=0) - start_time.replace(microsecond=0)
 
-            uptime_list.append(uptime.replace(",", ""))
+            uptime_list.append(uptime)
 
         except Exception:
 
@@ -120,12 +120,46 @@ def service_dictionary(app, ecs_client, ecs_services):
             )
 
             # GET ALL TASKS UPTIME
-            service['uptime'] = get_uptime(
+            ecs_uptime_list = get_uptime(
                 app,
                 ecs_client,
                 aws.parse_arn(ecs_cluster)['resource'],
                 aws.parse_arn(ecs_service)['resource']
             )
+
+            min_max_avg_list = []
+
+            if ecs_uptime_list:
+
+                min_max_avg_list.append(min(ecs_uptime_list))
+
+                min_max_avg_list.append(max(ecs_uptime_list))
+
+                min_max_avg_list.append(reduce(lambda x, y: (x + y) / 2, ecs_uptime_list))
+
+                # print(
+                #     'max {} '
+                #     'min {} '
+                #     'average {}'.format(
+                #         min_max_avg_list[0],
+                #         min_max_avg_list[1],
+                #         min_max_avg_list[2]
+                #     )
+                # )
+
+                service['min_uptime'] = '{}'.format(min_max_avg_list[0])
+                service['max_uptime'] = '{}'.format(min_max_avg_list[1])
+                service['avg_uptime'] = '{}'.format(min_max_avg_list[2])
+
+            elif not ecs_uptime_list:
+
+                service['min_uptime'] = 'N/A'
+                service['max_uptime'] = 'N/A'
+                service['avg_uptime'] = 'N/A'
+
+            else:
+
+                app.log.error('An error occurred trying to parse the uptime list')
 
             # PRINT SERVICE DESCRIPTION
             app.log.info('AWS: Service {0}, Count {1}, Active Task Definition {2}'.format(

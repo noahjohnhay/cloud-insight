@@ -60,7 +60,9 @@ def html_table(app, services):
                 'Version',
                 'Desired Count',
                 'Running Count',
-                'Uptime',
+                'Min Uptime',
+                'Max Uptime',
+                'Avg Uptime',
                 'Cluster',
                 'Launch Type'
             ],
@@ -75,7 +77,9 @@ def html_table(app, services):
                 [service['version'] for service in services],
                 [service['desired_count'] for service in services],
                 [service['running_count'] for service in services],
-                [service['uptime'] for service in services],
+                [service['min_uptime'] for service in services],
+                [service['max_uptime'] for service in services],
+                [service['avg_uptime'] for service in services],
                 [service['cluster'] for service in services],
                 [service['launch_type'] for service in services],
             ],
@@ -93,11 +97,15 @@ def html_table(app, services):
                     ],
                     '#F5F4F4',
                     '#F5F4F4',
+                    '#F5F4F4',
+                    '#F5F4F4',
                     '#F5F4F4'
                 ]
             ),
             align=[
                 'left',
+                'center',
+                'center',
                 'center',
                 'center',
                 'center',
