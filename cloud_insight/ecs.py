@@ -62,19 +62,25 @@ def list_tasks(client, cluster_name, service_name):
     return tasks
 
 
-def get_uptime(client, cluster_name, service_name):
+def get_uptime(app, client, cluster_name, service_name):
 
     uptime_list = []
 
     for task in list_tasks(client, cluster_name, service_name):
 
-        start_time = describe_task(client, cluster_name, task)['tasks'][0]['startedAt']
+        try:
 
-        current_time = datetime.datetime.now(start_time.tzinfo)
+            start_time = describe_task(client, cluster_name, task)['tasks'][0]['startedAt']
 
-        uptime = ' {}'.format(current_time.replace(microsecond=0) - start_time.replace(microsecond=0))
+            current_time = datetime.datetime.now(start_time.tzinfo)
 
-        uptime_list.append(uptime.replace(",", ""))
+            uptime = ' {}'.format(current_time.replace(microsecond=0) - start_time.replace(microsecond=0))
+
+            uptime_list.append(uptime.replace(",", ""))
+
+        except Exception:
+
+            app.log.error('Something went wrong trying to get uptime')
 
     return uptime_list
 
@@ -115,6 +121,7 @@ def service_dictionary(app, ecs_client, ecs_services):
 
             # GET ALL TASKS UPTIME
             service['uptime'] = get_uptime(
+                app,
                 ecs_client,
                 aws.parse_arn(ecs_cluster)['resource'],
                 aws.parse_arn(ecs_service)['resource']
