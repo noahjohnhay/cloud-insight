@@ -107,6 +107,8 @@ def service_dictionary(app, ecs_client, ecs_services):
             # ADD CLUSTER ITEM TO DICTIONARY
             service['cluster'] = aws.parse_arn(ecs_cluster)['resource']
 
+            service['region'] = ecs_client.meta.region_name
+
             # PRINT SERVICES
             app.log.info('AWS: Found service {0}'.format(
                 aws.parse_arn(ecs_service)['resource'])

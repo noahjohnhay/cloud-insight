@@ -16,26 +16,58 @@ def list_helper(app, aws_auth_type, aws_enabled, aws_regions, list_type=None):
 
         app.log.info('AWS: Enabled')
 
-        # IF AWS AUTH TYPE IS DEFAULT
-        if aws_auth_type == 'default':
+        # SET VARIABLES TO NONE
+        aws_profile_names = None
+        aws_access_key = None
+        aws_secret_key = None
+        aws_session_token = None
 
-            # SET AWS PROFILE NAMES TO NONE
-            aws_profile_names = None
+        if list_type == 'default':
 
-        elif list_type == 'default':
+            if aws_auth_type == 'keys':
 
-            aws_profile_names = app.config.get_section_dict('aws')['auth']['profile names']
+                aws_access_key = app.config.get_section_dict('aws')['auth']['access key']
+                aws_secret_key = app.config.get_section_dict('aws')['auth']['secret key']
 
-        elif list_type == 'source':
+                if app.config.get_section_dict('aws')['auth']['secret token']:
 
-            aws_profile_names = app.config.get_section_dict('source')['aws']['auth']['profile names']
+                    aws_session_token = app.config.get_section_dict('aws')['auth']['secret token']
+
+            elif aws_auth_type == 'profile':
+
+                aws_profile_names = app.config.get_section_dict('aws')['auth']['profile names']
 
         elif list_type == 'destination':
 
-            aws_profile_names = app.config.get_section_dict('destination')['aws']['auth']['profile names']
+            if aws_auth_type == 'keys':
+
+                aws_access_key = app.config.get_section_dict('destination')['aws']['auth']['access key']
+                aws_secret_key = app.config.get_section_dict('destination')['aws']['auth']['secret key']
+
+                if app.config.get_section_dict('destination')['aws']['auth']['secret token']:
+
+                    aws_session_token = app.config.get_section_dict('destination')['aws']['auth']['secret token']
+
+            elif aws_auth_type == 'profile':
+
+                aws_profile_names = app.config.get_section_dict('destination')['aws']['auth']['profile names']
+
+        elif list_type == 'source':
+
+            if aws_auth_type == 'keys':
+
+                aws_access_key = app.config.get_section_dict('source')['aws']['auth']['access key']
+                aws_secret_key = app.config.get_section_dict('source')['aws']['auth']['secret key']
+
+                if app.config.get_section_dict('source')['aws']['auth']['secret token']:
+
+                    aws_session_token = app.config.get_section_dict('source')['aws']['auth']['secret token']
+
+            elif aws_auth_type == 'profile':
+
+                aws_profile_names = app.config.get_section_dict('source')['aws']['auth']['profile names']
 
         else:
-            aws_profile_names = None
             app.log.error('list helper error occurred')
             app.close(1)
 
@@ -43,6 +75,9 @@ def list_helper(app, aws_auth_type, aws_enabled, aws_regions, list_type=None):
         for ecs_client in aws.all_clients(
                 app=app,
                 auth_type=aws_auth_type,
+                aws_access_key=aws_access_key,
+                aws_secret_key=aws_secret_key,
+                aws_session_token=aws_session_token,
                 aws_service='ecs',
                 aws_profile_names=aws_profile_names,
                 aws_regions=aws_regions):
@@ -72,6 +107,7 @@ def list_command(app):
     app.log.info('Running list command')
     app.config.parse_file(app.pargs.config)
 
+    # FETCH SERVICES INFORMATION
     ecs_services = list_helper(
         app=app,
         aws_auth_type=app.config.get_section_dict('aws')['auth']['type'],
@@ -94,6 +130,7 @@ def compare_command(app):
     app.log.info('Running compare command')
     app.config.parse_file(app.pargs.config)
 
+    # FETCH SOURCE SERVICES INFORMATION
     source_services = list_helper(
         app=app,
         aws_auth_type=app.config.get_section_dict('source')['aws']['auth']['type'],
@@ -102,6 +139,7 @@ def compare_command(app):
         list_type='source'
     )
 
+    # FETCH DESTINATION SERVICES INFORMATION
     destination_services = list_helper(
         app=app,
         aws_auth_type=app.config.get_section_dict('destination')['aws']['auth']['type'],
@@ -122,6 +160,8 @@ def compare_command(app):
     source_services = mod_str.regex_dictionary(app, source_services)
     destination_services = mod_str.regex_dictionary(app, destination_services)
 
+    # FIND DIFFERENT SERVICES
     diff_services = mod_str.same_dictionary(source_services, destination_services)
 
+    # RUN OUTPUT
     output.compare_table(app, diff_services, 'html_table')

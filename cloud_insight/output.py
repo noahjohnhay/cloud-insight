@@ -51,8 +51,12 @@ def html_table(app, services):
             100,
             20,
             20,
-            100,
-            100
+            60,
+            60,
+            80,
+            80,
+            30,
+            30
         ],
         header=dict(
             values=[
@@ -64,6 +68,7 @@ def html_table(app, services):
                 'Max Uptime',
                 'Avg Uptime',
                 'Cluster',
+                'Region',
                 'Launch Type'
             ],
             fill=dict(
@@ -81,7 +86,8 @@ def html_table(app, services):
                 [service['max_uptime'] for service in services],
                 [service['avg_uptime'] for service in services],
                 [service['cluster'] for service in services],
-                [service['launch_type'] for service in services],
+                [service['region'] for service in services],
+                [service['launch_type'] for service in services]
             ],
             fill=dict(
                 color=[
@@ -99,6 +105,7 @@ def html_table(app, services):
                     '#F5F4F4',
                     '#F5F4F4',
                     '#F5F4F4',
+                    '#F5F4F4',
                     '#F5F4F4'
                 ]
             ),
@@ -112,6 +119,7 @@ def html_table(app, services):
                 'center',
                 'center',
                 'center',
+                'center'
             ]
         )
     )
