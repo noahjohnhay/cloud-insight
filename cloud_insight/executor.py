@@ -29,7 +29,7 @@ def list_helper(app, aws_auth_type, aws_enabled, aws_regions, list_type=None):
                 aws_access_key = app.config.get_section_dict('aws')['auth']['aws_access_key']
                 aws_secret_key = app.config.get_section_dict('aws')['auth']['aws_secret_key']
 
-                if app.config.get_section_dict('aws')['auth']['secret token']:
+                if 'aws_session_token' in app.config.get_section_dict('aws')['auth']:
 
                     aws_session_token = app.config.get_section_dict('aws')['auth']['aws_session_token']
 
@@ -44,7 +44,7 @@ def list_helper(app, aws_auth_type, aws_enabled, aws_regions, list_type=None):
                 aws_access_key = app.config.get_section_dict('destination')['aws']['auth']['aws_access_key']
                 aws_secret_key = app.config.get_section_dict('destination')['aws']['auth']['aws_secret_key']
 
-                if app.config.get_section_dict('destination')['aws']['auth']['secret token']:
+                if 'aws_session_token' in app.config.get_section_dict('destination')['aws']['auth']:
 
                     aws_session_token = app.config.get_section_dict('destination')['aws']['auth']['aws_session_token']
 
@@ -59,7 +59,7 @@ def list_helper(app, aws_auth_type, aws_enabled, aws_regions, list_type=None):
                 aws_access_key = app.config.get_section_dict('source')['aws']['auth']['aws_access_key']
                 aws_secret_key = app.config.get_section_dict('source')['aws']['auth']['aws_secret_key']
 
-                if app.config.get_section_dict('source')['aws']['auth']['secret token']:
+                if 'aws_session_token' in app.config.get_section_dict('source')['aws']['auth']:
 
                     aws_session_token = app.config.get_section_dict('source')['aws']['auth']['aws_session_token']
 
