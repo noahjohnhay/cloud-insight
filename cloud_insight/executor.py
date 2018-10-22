@@ -26,12 +26,12 @@ def list_helper(app, aws_auth_type, aws_enabled, aws_regions, list_type=None):
 
             if aws_auth_type == 'keys':
 
-                aws_access_key = app.config.get_section_dict('aws')['auth']['access key']
-                aws_secret_key = app.config.get_section_dict('aws')['auth']['secret key']
+                aws_access_key = app.config.get_section_dict('aws')['auth']['aws_access_key']
+                aws_secret_key = app.config.get_section_dict('aws')['auth']['aws_secret_key']
 
                 if app.config.get_section_dict('aws')['auth']['secret token']:
 
-                    aws_session_token = app.config.get_section_dict('aws')['auth']['secret token']
+                    aws_session_token = app.config.get_section_dict('aws')['auth']['aws_session_token']
 
             elif aws_auth_type == 'profile':
 
@@ -41,12 +41,12 @@ def list_helper(app, aws_auth_type, aws_enabled, aws_regions, list_type=None):
 
             if aws_auth_type == 'keys':
 
-                aws_access_key = app.config.get_section_dict('destination')['aws']['auth']['access key']
-                aws_secret_key = app.config.get_section_dict('destination')['aws']['auth']['secret key']
+                aws_access_key = app.config.get_section_dict('destination')['aws']['auth']['aws_access_key']
+                aws_secret_key = app.config.get_section_dict('destination')['aws']['auth']['aws_secret_key']
 
                 if app.config.get_section_dict('destination')['aws']['auth']['secret token']:
 
-                    aws_session_token = app.config.get_section_dict('destination')['aws']['auth']['secret token']
+                    aws_session_token = app.config.get_section_dict('destination')['aws']['auth']['aws_session_token']
 
             elif aws_auth_type == 'profile':
 
@@ -56,12 +56,12 @@ def list_helper(app, aws_auth_type, aws_enabled, aws_regions, list_type=None):
 
             if aws_auth_type == 'keys':
 
-                aws_access_key = app.config.get_section_dict('source')['aws']['auth']['access key']
-                aws_secret_key = app.config.get_section_dict('source')['aws']['auth']['secret key']
+                aws_access_key = app.config.get_section_dict('source')['aws']['auth']['aws_access_key']
+                aws_secret_key = app.config.get_section_dict('source')['aws']['auth']['aws_secret_key']
 
                 if app.config.get_section_dict('source')['aws']['auth']['secret token']:
 
-                    aws_session_token = app.config.get_section_dict('source')['aws']['auth']['secret token']
+                    aws_session_token = app.config.get_section_dict('source')['aws']['auth']['aws_session_token']
 
             elif aws_auth_type == 'profile':
 

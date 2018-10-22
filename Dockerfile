@@ -4,9 +4,12 @@ WORKDIR /app
 
 COPY . /app
 
-RUN python setup.py install
-
-RUN chmod 777 -R /app
+RUN set -x && \
+    apk add --update libintl && \
+    apk add --virtual build_deps gettext && \
+    cp /usr/bin/envsubst /usr/local/bin/envsubst && \
+    apk del build_deps && \
+    python setup.py install
 
 VOLUME /root/.aws
 
