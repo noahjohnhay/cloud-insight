@@ -47,6 +47,7 @@ def html_table(app, services):
     trace = go.graph_objs.Table(
         # DESCRIBE TABLE HEADERS
         columnwidth=[
+            10,
             100,
             100,
             20,
@@ -60,6 +61,7 @@ def html_table(app, services):
         ],
         header=dict(
             values=[
+                '#',
                 'Name',
                 'Version',
                 'Desired Count',
@@ -78,6 +80,7 @@ def html_table(app, services):
         # DESCRIBE TABLE CONTENTS
         cells=dict(
             values=[
+                [idx for idx, service in enumerate(services)],
                 [service['service'] for service in services],
                 [service['version'] for service in services],
                 [service['desired_count'] for service in services],
@@ -91,6 +94,7 @@ def html_table(app, services):
             ],
             fill=dict(
                 color=[
+                    '#F5F4F4',
                     '#F5F4F4',
                     '#F5F4F4',
                     [
@@ -110,6 +114,7 @@ def html_table(app, services):
                 ]
             ),
             align=[
+                'center',
                 'left',
                 'center',
                 'center',
@@ -203,12 +208,14 @@ def compare_table(app, services, output_type):
         trace = go.graph_objs.Table(
             # DESCRIBE TABLE HEADERS
             columnwidth=[
+                10,
                 100,
                 100,
                 100
             ],
             header=dict(
                 values=[
+                    '#',
                     'Name',
                     'Source Version',
                     'Destination Version'
@@ -220,12 +227,14 @@ def compare_table(app, services, output_type):
             # DESCRIBE TABLE CONTENTS
             cells=dict(
                 values=[
+                    [idx for idx, service in enumerate(services)],
                     [service['service'] for service in services],
                     [service['source_version'] for service in services],
                     [service['destination_version'] for service in services]
                 ],
                 fill=dict(
                     color=[
+                        '#F5F4F4',
                         '#F5F4F4',
                         [
                             '#24F015' if service['source_version'] == service['destination_version'] \
@@ -238,6 +247,7 @@ def compare_table(app, services, output_type):
                     ]
                 ),
                 align=[
+                    'center',
                     'left',
                     'left',
                     'left'
