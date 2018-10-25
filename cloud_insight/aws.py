@@ -3,89 +3,86 @@
 import boto3
 
 
-# CREATE ALL CLIENTS
-def all_clients(
+# CREATE AN ARRAY OF ALL POSSIBLE SESSIONS
+def all_sessions(
         app,
         auth_type,
-        aws_service,
         aws_profile_names=None,
-        aws_regions=None,
         aws_access_key=None,
         aws_secret_key=None,
         aws_session_token=None):
-
-    clients = []
-    if aws_regions is None:
-        app.log.info('AWS: Regions is empty, fetching all regions')
-        aws_regions = list_regions(aws_service)
+    sessions = []
     if auth_type == 'profile':
-        app.log.info('AWS: Using profile authentication')
+        app.log.info(
+            'AWS: Using profile authentication'
+        )
         for aws_profile_name in aws_profile_names:
-            for aws_region in aws_regions:
-                clients.append(
-                    profile_client(
-                        app=app,
-                        profile_name=aws_profile_name,
-                        region=aws_region,
-                        service=aws_service
-                    )
+            sessions.append(
+                profile_session(
+                    app=app,
+                    profile_name=aws_profile_name
                 )
+            )
     elif auth_type == 'default':
-        app.log.info('AWS: Using default authentication')
-        for aws_region in aws_regions:
-            clients.append(
-                default_client(
-                    region=aws_region,
-                    service=aws_service
-                )
+        app.log.info(
+            'AWS: Using default authentication'
+        )
+        sessions.append(
+            default_session(
+                app=app
             )
+        )
     elif auth_type == 'keys':
-        app.log.info('AWS: Using keys authentication')
-        for aws_region in aws_regions:
-            clients.append(
-                key_client(
-                    region=aws_region,
-                    service=aws_service,
-                    access_key=aws_access_key,
-                    secret_key=aws_secret_key,
-                    session_token=aws_session_token
-                )
+        app.log.info(
+            'AWS: Using keys authentication'
+        )
+        sessions.append(
+            key_session(
+                app=app,
+                access_key=aws_access_key,
+                secret_key=aws_secret_key,
+                session_token=aws_session_token
             )
-
+        )
     else:
-        app.log.error('AWS: Could not determine authentication type')
+        app.log.error(
+            'AWS: Could not determine authentication type'
+        )
         app.close(1)
-    return clients
+    return sessions
 
 
-# CREATE DEFAULT CLIENT
-def default_client(region, service):
-    client = boto3.client(
-        service,
-        region_name=region
+# CREATE A SESSION USING DEFAULT CREDENTIALS
+def default_session(app):
+    app.log.info(
+        'AWS: Trying to auth with default credentials'
     )
-    return client
+    session = boto3.Session()
+    return session
 
 
-# CREATE KEY CLIENT
-def key_client(region, service, access_key, secret_key, session_token):
-    client = boto3.client(
-        service,
+# CREATE A SESSION USING ACCESS KEY AND SECRET KEY
+def key_session(app, access_key, secret_key, session_token=None):
+    app.log.info(
+        'AWS: Trying to auth with provided keys ACCESS_KEY_ID:{}'.format(
+            access_key
+        )
+    )
+    session = boto3.Session(
         aws_access_key_id=access_key,
         aws_secret_access_key=secret_key,
-        aws_session_token=session_token,
-        region_name=region
+        aws_session_token=session_token
     )
-    return client
+    return session
 
 
-# LIST ALL REGIONS BY SERVICE
-def list_regions(service):
+# LIST ALL REGIONS AVAILABLE FOR A SPECIFIC SERVICE
+def list_regions(aws_service):
     session = boto3.Session()
-    all_regions = session.get_available_regions(
-        service
+    all_service_regions = session.get_available_regions(
+        aws_service
     )
-    return all_regions
+    return all_service_regions
 
 
 # PARSE AWS ARN
@@ -107,14 +104,44 @@ def parse_arn(arn):
     return result
 
 
-# CREATE PROFILE CLIENT
-def profile_client(app, profile_name, region, service):
+# CREATE A SESSION USING PROFILE
+def profile_session(app, profile_name):
+    app.log.info(
+        'AWS: Trying to auth with profile {}'.format(
+            profile_name
+        )
+    )
     session = boto3.Session(
         profile_name=profile_name
     )
-    client = session.client(
-        service,
-        region_name=region
+    return session
+
+
+# CREATE A CLIENT USING A SESSION
+def session_client(app, aws_region, aws_service, session):
+    app.log.info(
+        'AWS: Creating a {} client in {}'.format(
+            aws_service,
+            aws_region
+        )
     )
-    app.log.info('AWS: Trying to auth with profile {0} in region {1}'.format(profile_name, region))
+    client = session.client(
+        aws_service,
+        region_name=aws_region
+    )
     return client
+
+
+# CREATE A RESOURCE USING A SESSION
+def session_resource(app, aws_region, aws_service, session):
+    app.log.info(
+        'AWS: Creating a {} resource in {}'.format(
+            aws_service,
+            aws_region
+        )
+    )
+    resource = session.resource(
+        aws_service,
+        region_name=aws_region
+    )
+    return resource

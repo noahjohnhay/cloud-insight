@@ -1,0 +1,70 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: 'ECS Events Database'
+
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  CloudWatchRuleName:
+    Default: 'Cloud-Insight'
+    Description: 'CloudWatch Rule Name'
+    Type: String
+  DynamoDBTableName:
+    Default: 'Cloud-Insight'
+    Description: 'DynamoDBTableName'
+    Type: String
+  DynamoDBTTL:
+    Default: '21600'
+    Description: 'TTL of DynamoDB records in seconds'
+    Type: Number
+
+Resources:
+  InsertEvents:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: 'Cloud-Insight; Inserts Events into DynamoDB'
+      Runtime: python2.7
+      CodeUri: insertEvents
+      Handler: index.handler
+      Timeout: 300
+      Environment:
+        Variables:
+          Region: !Ref 'AWS::Region'
+          TTL_Seconds: !Ref 'DynamoDBTTL'
+          Table: !Ref 'DynamoDBTableName'
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName: !Ref 'DynamoDBTableName'
+  CloudWatchRule:
+    Type: 'AWS::Events::Rule'
+    Properties:
+      Name: !Ref 'CloudWatchRuleName'
+      Description: 'Triggers lambda to insert events into dynamodb when ecs events occur'
+      EventPattern: '{"source":["aws.ecs"],"detail-type":["ECS Task State Change"]}'
+      State: 'ENABLED'
+      Targets:
+      - Arn: !Ref LambdaFunction
+        Id: !Ref 'CloudWatchRuleName'
+  DynamoDBTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Ref 'DynamoDBTableName'
+      AttributeDefinitions:
+      - AttributeName: 'group'
+        AttributeType: 'S'
+      - AttributeName: 'taskArn'
+        AttributeType: 'S'
+      KeySchema:
+      - AttributeName: 'group'
+        KeyType: HASH
+      - AttributeName: 'taskArn'
+        KeyType: RANGE
+      ProvisionedThroughput:
+        ReadCapacityUnits: '200'
+        WriteCapacityUnits: '10'
+      SSESpecification:
+        SSEEnabled: true
+      TimeToLiveSpecification:
+      - AttributeName: TTL
+        Enabled: true

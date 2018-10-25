@@ -6,10 +6,9 @@ import mod_str as mod_str
 import cloud_insight.output as output
 
 
-def list_helper(app, aws_auth_type, aws_enabled, aws_regions, list_type=None):
+def list_helper(app, aws_auth_type, aws_enabled, aws_regions, namespace, list_type=None):
 
-    # CREATE EMPTY ARRAY
-    ecs_services = []
+    services = []
 
     # IF AWS IS ENABLED
     if aws_enabled:
@@ -71,97 +70,99 @@ def list_helper(app, aws_auth_type, aws_enabled, aws_regions, list_type=None):
             app.log.error('list helper error occurred')
             app.close(1)
 
-        # ITERATE THROUGH ALL CREATED CLIENTS
-        for ecs_client in aws.all_clients(
-                app=app,
-                auth_type=aws_auth_type,
-                aws_access_key=aws_access_key,
-                aws_secret_key=aws_secret_key,
-                aws_session_token=aws_session_token,
-                aws_service='ecs',
-                aws_profile_names=aws_profile_names,
-                aws_regions=aws_regions):
+        if aws_regions is None:
+            app.log.info('AWS: Regions is empty, fetching all regions')
+            aws_regions = aws.list_regions('ecs')
 
-            # CREATE ARRAY OF SERVICE DICTIONARIES
-            ecs_services = ecs.service_dictionary(
-                app=app,
-                ecs_client=ecs_client,
-                ecs_services=ecs_services
-            )
+        # ITERATE THROUGH ALL REGIONS
+        for aws_region in aws_regions:
+
+            # ITERATE THROUGH ALL CREATED SESSIONS
+            for session in aws.all_sessions(
+                    app=app,
+                    auth_type=aws_auth_type,
+                    aws_access_key=aws_access_key,
+                    aws_secret_key=aws_secret_key,
+                    aws_session_token=aws_session_token,
+                    aws_profile_names=aws_profile_names
+            ):
+
+                # CREATE ARRAY OF SERVICE DICTIONARIES
+                services = ecs.service_dictionary(
+                    app=app,
+                    aws_region=aws_region,
+                    aws_session=session,
+                    namespace=namespace
+                )
 
     else:
-
         app.log.error('MAIN: Nothing is enabled')
-
         app.close(1)
-
-    return ecs_services
-
-
-def default_command(app):
-    app.log.error('A namespace must be specified use "--help" to see all options')
-    app.close(1)
+    return services
 
 
-def list_command(app):
-    app.log.info('Running list command')
+def main(app, namespace):
+
+    app.log.info('Running {} command'.format(namespace))
     app.config.parse_file(app.pargs.config)
 
-    # FETCH SERVICES INFORMATION
-    ecs_services = list_helper(
-        app=app,
-        aws_auth_type=app.config.get_section_dict('aws')['auth']['type'],
-        aws_enabled=app.config.get_section_dict('aws')['enabled'],
-        aws_regions=app.config.get_section_dict('aws')['regions'],
-        list_type='default'
-    )
+    if namespace == 'compare':
+        # FETCH SOURCE SERVICES INFORMATION
+        source_services = list_helper(
+            app=app,
+            aws_auth_type=app.config.get_section_dict('source')['aws']['auth']['type'],
+            aws_enabled=app.config.get_section_dict('source')['aws']['enabled'],
+            aws_regions=app.config.get_section_dict('source')['aws']['regions'],
+            namespace='compare',
+            list_type='source'
 
-    # APPLY FILTERING
-    ecs_services = mod_str.filter_dictionary(app, ecs_services)
+        )
 
-    # APPLY REPLACEMENTS
-    ecs_services = mod_str.replace_dictionary(app, ecs_services)
+        # FETCH DESTINATION SERVICES INFORMATION
+        destination_services = list_helper(
+            app=app,
+            aws_auth_type=app.config.get_section_dict('destination')['aws']['auth']['type'],
+            aws_enabled=app.config.get_section_dict('destination')['aws']['enabled'],
+            aws_regions=app.config.get_section_dict('destination')['aws']['regions'],
+            namespace='compare',
+            list_type='destination'
 
-    # PRINT OUTPUTS
-    output.main(app, ecs_services)
+        )
 
+        # APPLY FILTERING
+        source_services = mod_str.filter_dictionary(app, source_services)
+        destination_services = mod_str.filter_dictionary(app, destination_services)
 
-def compare_command(app):
-    app.log.info('Running compare command')
-    app.config.parse_file(app.pargs.config)
+        # APPLY REPLACEMENTS
+        source_services = mod_str.replace_dictionary(app, source_services)
+        destination_services = mod_str.replace_dictionary(app, destination_services)
 
-    # FETCH SOURCE SERVICES INFORMATION
-    source_services = list_helper(
-        app=app,
-        aws_auth_type=app.config.get_section_dict('source')['aws']['auth']['type'],
-        aws_enabled=app.config.get_section_dict('source')['aws']['enabled'],
-        aws_regions=app.config.get_section_dict('source')['aws']['regions'],
-        list_type='source'
-    )
+        # APPLY REGEXES
+        source_services = mod_str.regex_dictionary(app, source_services)
+        destination_services = mod_str.regex_dictionary(app, destination_services)
 
-    # FETCH DESTINATION SERVICES INFORMATION
-    destination_services = list_helper(
-        app=app,
-        aws_auth_type=app.config.get_section_dict('destination')['aws']['auth']['type'],
-        aws_enabled=app.config.get_section_dict('destination')['aws']['enabled'],
-        aws_regions=app.config.get_section_dict('destination')['aws']['regions'],
-        list_type='destination'
-    )
+        # FIND DIFFERENT SERVICES
+        diff_services = mod_str.same_dictionary(source_services, destination_services)
 
-    # APPLY FILTERING
-    source_services = mod_str.filter_dictionary(app, source_services)
-    destination_services = mod_str.filter_dictionary(app, destination_services)
+        # PRINT OUTPUT
+        output.main(app, diff_services, 'compare')
+    else:
 
-    # APPLY REPLACEMENTS
-    source_services = mod_str.replace_dictionary(app, source_services)
-    destination_services = mod_str.replace_dictionary(app, destination_services)
+        # FETCH SERVICE INFORMATION
+        ecs_services = list_helper(
+            app=app,
+            aws_auth_type=app.config.get_section_dict('aws')['auth']['type'],
+            aws_enabled=app.config.get_section_dict('aws')['enabled'],
+            aws_regions=app.config.get_section_dict('aws')['regions'],
+            namespace=namespace,
+            list_type='default'
+        )
 
-    # APPLY REGEXES
-    source_services = mod_str.regex_dictionary(app, source_services)
-    destination_services = mod_str.regex_dictionary(app, destination_services)
+        # APPLY FILTERING
+        ecs_services = mod_str.filter_dictionary(app, ecs_services)
 
-    # FIND DIFFERENT SERVICES
-    diff_services = mod_str.same_dictionary(source_services, destination_services)
+        # APPLY REPLACEMENTS
+        ecs_services = mod_str.replace_dictionary(app, ecs_services)
 
-    # RUN OUTPUT
-    output.compare_table(app, diff_services, 'html_table')
+        # PRINT OUTPUT
+        output.main(app, ecs_services, namespace)

@@ -8,24 +8,37 @@ import cloud_insight.executor as executor
 class BaseController(CementBaseController):
     class Meta:
         label = 'base'
-        description = "Simplifies the tracking of docker container versions, " \
-                      "health and other important information across various platforms."
+        description = ""
         arguments = [
-            (['-c', '--config'],
-             dict(action='store', help='Path to configuration file to use'))
-            ]
-
-    @expose(hide=True)
-    def default(self):
-        executor.default_command(self.app)
-
-    @expose(help="This command will list the container information")
-    def list(self):
-        executor.list_command(self.app)
+            (
+                ['-c', '--config'], dict(action='store', help='Path to configuration file to use')
+            )
+        ]
 
     @expose(help="This command will compare two sets of containers")
     def compare(self):
-        executor.compare_command(self.app)
+        executor.main(self.app, 'compare')
+
+    @expose(help="This command will list the containers connectivity information")
+    def connectivity(self):
+        executor.main(self.app, 'connectivity')
+
+    @expose(hide=True)
+    def default(self):
+        self.app.log.error('A namespace must be specified use "--help" to see all options')
+        self.app.close(1)
+
+    @expose(help="This command will list the containers health information")
+    def health(self):
+        executor.main(self.app, 'health')
+
+    @expose(help="This command will list the containers history information")
+    def history(self):
+        executor.main(self.app, 'history')
+
+    @expose(help="This command will list the container information")
+    def list(self):
+        executor.main(self.app, 'list')
 
 
 class CloudInsight(CementApp):

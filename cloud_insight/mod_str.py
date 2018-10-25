@@ -17,9 +17,10 @@ def filter_dictionary(app, services):
             filter_list = app.config.get_section_dict('output')['filter'][filter_key]
 
             # FILTER DICTIONARY BASED ON FILTER KEY & FILTER LIST
+            # TODO: figure out how to iterate through the list of filter keys again
             services = [
-                d for d in services if d[filter_key] in filter_list
-            ]
+                service for service in services if re.match(filter_list[0], service[filter_key])
+             ]
 
     return services
 
