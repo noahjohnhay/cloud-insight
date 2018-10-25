@@ -20,7 +20,8 @@ REQUIRED = [
     'cement==2.10.12',
     'plotly==2.7.0',
     'PrettyTable',
-    'urllib3<=1.23'
+    'urllib3<=1.23',
+    'botocore'
 ]
 
 setup(

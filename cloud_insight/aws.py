@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import boto3
+from botocore.config import Config
 
 
 # CREATE AN ARRAY OF ALL POSSIBLE SESSIONS
@@ -125,8 +126,10 @@ def session_client(app, aws_region, aws_service, session):
             aws_region
         )
     )
+    config = set_config()
     client = session.client(
         aws_service,
+        config=config,
         region_name=aws_region
     )
     return client
@@ -145,3 +148,15 @@ def session_resource(app, aws_region, aws_service, session):
         region_name=aws_region
     )
     return resource
+
+
+# SET BOTO CONFIG
+def set_config():
+    config = Config(
+        connect_timeout=120,
+        read_timeout=120,
+        retries={
+            'max_attempts': 10
+        }
+    )
+    return config
