@@ -1,8 +1,8 @@
 #!/usr/bin/python
 
 from plotly.offline import plot
-import plotly.graph_objs as go
 from prettytable import PrettyTable
+import plotly.graph_objs as go
 
 
 def main(app, services, table_type):
@@ -155,11 +155,13 @@ def list_table(app, services, output_type):
             filename=app.config.get_section_dict('output')['path']
         )
 
-    else:
+    elif output_type == 'json':
 
+        print(services)
+
+    else:
         app.log.error('OUTPUT: No valid output type selected')
         app.close(1)
-
     return
 
 

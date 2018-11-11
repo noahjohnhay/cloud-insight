@@ -104,10 +104,8 @@ def list_helper(app, aws_auth_type, aws_enabled, aws_regions, namespace, list_ty
 def main(app, namespace):
 
     app.log.info('Running {} command'.format(namespace))
-    app.config.parse_file(app.pargs.config)
 
     if namespace == 'compare':
-        # FETCH SOURCE SERVICES INFORMATION
         source_services = list_helper(
             app=app,
             aws_auth_type=app.config.get_section_dict('source')['aws']['auth']['type'],
@@ -117,8 +115,6 @@ def main(app, namespace):
             list_type='source'
 
         )
-
-        # FETCH DESTINATION SERVICES INFORMATION
         destination_services = list_helper(
             app=app,
             aws_auth_type=app.config.get_section_dict('destination')['aws']['auth']['type'],
@@ -129,23 +125,14 @@ def main(app, namespace):
 
         )
 
-        # APPLY FILTERING
-        source_services = mod_str.filter_dictionary(app, source_services)
-        destination_services = mod_str.filter_dictionary(app, destination_services)
-
-        # APPLY REPLACEMENTS
-        source_services = mod_str.replace_dictionary(app, source_services)
-        destination_services = mod_str.replace_dictionary(app, destination_services)
-
-        # APPLY REGEXES
-        source_services = mod_str.regex_dictionary(app, source_services)
-        destination_services = mod_str.regex_dictionary(app, destination_services)
+        source_services = mod_str.main(app, source_services)
+        destination_services = mod_str.main(app, destination_services)
 
         # FIND DIFFERENT SERVICES
-        diff_services = mod_str.same_dictionary(source_services, destination_services)
+        ecs_services = mod_str.same_dictionary(source_services, destination_services)
 
         # PRINT OUTPUT
-        output.main(app, diff_services, 'compare')
+        output.main(app, ecs_services, 'compare')
     else:
 
         # FETCH SERVICE INFORMATION
@@ -158,11 +145,9 @@ def main(app, namespace):
             list_type='default'
         )
 
-        # APPLY FILTERING
-        ecs_services = mod_str.filter_dictionary(app, ecs_services)
-
-        # APPLY REPLACEMENTS
-        ecs_services = mod_str.replace_dictionary(app, ecs_services)
+        ecs_services = mod_str.main(app, ecs_services)
 
         # PRINT OUTPUT
         output.main(app, ecs_services, namespace)
+
+    return ecs_services

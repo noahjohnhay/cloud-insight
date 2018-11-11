@@ -14,5 +14,4 @@ def time_ago(days=0, hours=0, minutes=0, seconds=0):
         minutes=minutes,
         seconds=seconds
     )
-    print('Will be searching events between {} & {}'.format(current_time, past_time))
     return past_time

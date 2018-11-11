@@ -3,6 +3,7 @@
 from cement.core.foundation import CementApp
 from cement.core.controller import CementBaseController, expose
 import cloud_insight.executor as executor
+import cloud_insight.api as api
 
 
 class BaseController(CementBaseController):
@@ -17,10 +18,12 @@ class BaseController(CementBaseController):
 
     @expose(help="This command will compare two sets of containers")
     def compare(self):
+        self.app.config.parse_file(self.app.pargs.config)
         executor.main(self.app, 'compare')
 
     @expose(help="This command will list the containers connectivity information")
     def connectivity(self):
+        self.app.config.parse_file(self.app.pargs.config)
         executor.main(self.app, 'connectivity')
 
     @expose(hide=True)
@@ -30,15 +33,22 @@ class BaseController(CementBaseController):
 
     @expose(help="This command will list the containers health information")
     def health(self):
+        self.app.config.parse_file(self.app.pargs.config)
         executor.main(self.app, 'health')
 
     @expose(help="This command will list the containers history information")
     def history(self):
+        self.app.config.parse_file(self.app.pargs.config)
         executor.main(self.app, 'history')
 
     @expose(help="This command will list the container information")
     def list(self):
+        self.app.config.parse_file(self.app.pargs.config)
         executor.main(self.app, 'list')
+
+    @expose(help="This command will list the container information")
+    def api(self):
+        api.start_api(self.app)
 
 
 class CloudInsight(CementApp):
