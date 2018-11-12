@@ -71,5 +71,6 @@ def start_api(app):
             return 'INVALID METHOD', 404
 
     flask_app.run(
+        host='0.0.0.0',
         debug=False
     )
