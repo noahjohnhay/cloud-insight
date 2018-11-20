@@ -1,4 +1,5 @@
 import json
+import cloud_insight.aws as aws
 import cloud_insight.executor as executor
 from flask import Flask, request
 from flask_cors import CORS
@@ -25,11 +26,19 @@ def post_handler(app, namespace):
 def start_api(app):
     app.log.info('Starting the API')
 
+    @flask_app.route("/", methods=['GET'])
+    def default_route():
+        return '', 200
+
     @flask_app.route("/compare", methods=['POST'])
     def compare_route():
         if request.method == 'POST':
-            services = post_handler(app, 'compare')
-            return services, 201
+            response = flask_app.response_class(
+                mimetype='application/json',
+                response=post_handler(app, 'compare'),
+                status=200
+            )
+            return response
         else:
             app.log.error('Invalid Method')
             return 'INVALID METHOD', 404
@@ -37,8 +46,12 @@ def start_api(app):
     @flask_app.route("/connectivity", methods=['POST'])
     def connectivity_route():
         if request.method == 'POST':
-            services = post_handler(app, 'connectivity')
-            return services, 201
+            response = flask_app.response_class(
+                mimetype='application/json',
+                response=post_handler(app, 'connectivity'),
+                status=200
+            )
+            return response
         else:
             app.log.error('Invalid Method')
             return 'INVALID METHOD', 404
@@ -46,8 +59,12 @@ def start_api(app):
     @flask_app.route("/health", methods=['POST'])
     def health_route():
         if request.method == 'POST':
-            services = post_handler(app, 'health')
-            return services, 201
+            response = flask_app.response_class(
+                mimetype='application/json',
+                response=post_handler(app, 'health'),
+                status=200
+            )
+            return response
         else:
             app.log.error('Invalid Method')
             return 'INVALID METHOD', 404
@@ -55,8 +72,12 @@ def start_api(app):
     @flask_app.route("/history", methods=['POST'])
     def history_route():
         if request.method == 'POST':
-            services = post_handler(app, 'history')
-            return services, 201
+            response = flask_app.response_class(
+                mimetype='application/json',
+                response=post_handler(app, 'history'),
+                status=200
+            )
+            return response
         else:
             app.log.error('Invalid Method')
             return 'INVALID METHOD', 404
@@ -64,11 +85,28 @@ def start_api(app):
     @flask_app.route("/list", methods=['POST'])
     def list_route():
         if request.method == 'POST':
-            services = post_handler(app, 'list')
-            return services, 201
+            response = flask_app.response_class(
+                mimetype='application/json',
+                response=post_handler(app, 'list'),
+                status=200
+            )
+            return response
         else:
             app.log.error('Invalid Method')
             return 'INVALID METHOD', 404
+
+    @flask_app.route("/regions", methods=['GET'])
+    def regions_route():
+        response = flask_app.response_class(
+            mimetype='application/json',
+            response=json.dumps(
+                aws.list_regions(
+                    request.args.get('aws_service')
+                )
+            ),
+            status=200
+        )
+        return response
 
     flask_app.run(
         host='0.0.0.0',
