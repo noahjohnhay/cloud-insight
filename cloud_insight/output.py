@@ -4,7 +4,11 @@ from plotly.offline import plot
 from prettytable import PrettyTable
 import plotly.graph_objs as go
 import json
+import datetime
 
+def json_date(o):
+    if isinstance(o, datetime.datetime):
+        return o.__str__()
 
 def main(app, services, table_type):
     if app.config.get_section_dict('output')['enabled']:
@@ -571,7 +575,7 @@ def list_table(app, services, output_type):
         )
 
     elif output_type == 'json':
-        print(json.dumps(services))
+        print(json.dumps(services, default = json_date))
 
     else:
         app.log.error('OUTPUT: No valid output type selected')
