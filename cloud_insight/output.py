@@ -3,6 +3,7 @@
 from plotly.offline import plot
 from prettytable import PrettyTable
 import plotly.graph_objs as go
+import json
 
 
 def main(app, services, table_type):
@@ -570,8 +571,7 @@ def list_table(app, services, output_type):
         )
 
     elif output_type == 'json':
-
-        print(services)
+        print(json.dumps(services))
 
     else:
         app.log.error('OUTPUT: No valid output type selected')
