@@ -15,6 +15,6 @@ VOLUME /root/.aws
 
 VOLUME /app
 
-EXPOSE 5000
+EXPOSE 54321
 
 ENTRYPOINT ["cloud-insight"]
