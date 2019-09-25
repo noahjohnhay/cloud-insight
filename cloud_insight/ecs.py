@@ -138,8 +138,12 @@ def service_dictionary(app, aws_region, aws_session, namespace):
             service['version'] = \
                 ecs_task_description['taskDefinition']['containerDefinitions'][0]['image'].split(':', 1)[-1]
 
-            service['created_at'] = ecs_service_description['services'][0]['deployments'][0]['createdAt']
-            service['updated_at'] = ecs_service_description['services'][0]['deployments'][0]['updatedAt']
+            try:
+                service['created_at'] = ecs_service_description['services'][0]['deployments'][0]['createdAt']
+                service['updated_at'] = ecs_service_description['services'][0]['deployments'][0]['updatedAt']
+            except Exception:
+                service['created_at'] = "unknown"
+                service['updated_at'] = "unknown"
 
             # # PRINT SERVICE DESCRIPTION
             # app.log.info('AWS: Service {0}, Count {1}, Active Task Definition {2}'.format(
