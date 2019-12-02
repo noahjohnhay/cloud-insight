@@ -96,10 +96,15 @@ def parse_arn(arn):
         'region': elements[3],
         'account': elements[4],
         'resource': elements[5],
-        'resource_type': None
+        'resource_type': None,
+        "parent_resource": None
     }
     if '/' in result['resource']:
         result['resource_type'], result['resource'] = result['resource'].split('/', 1)
+        if "/" in result["resource"]:
+            result["parent_resource"], result["resource"] = result["resource"].split(
+                "/", 1
+            )
     elif ':' in result['resource']:
         result['resource_type'], result['resource'] = result['resource'].split(':', 1)
     return result

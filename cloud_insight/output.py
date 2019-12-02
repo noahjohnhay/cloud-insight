@@ -6,9 +6,11 @@ import plotly.graph_objs as go
 import json
 import datetime
 
+
 def json_date(o):
     if isinstance(o, datetime.datetime):
         return o.__str__()
+
 
 def main(app, services, table_type):
     if app.config.get_section_dict('output')['enabled']:
@@ -494,6 +496,7 @@ def list_table(app, services, output_type):
                 80,
                 80,
                 30,
+                30,
                 30
             ],
             header=dict(
@@ -508,7 +511,8 @@ def list_table(app, services, output_type):
                     'Avg Uptime',
                     'Cluster',
                     'Region',
-                    'Launch Type'
+                    'Soft Memory',
+                    'Hard Memory'
                 ],
                 fill=dict(
                     color='#a1c3d1'
@@ -527,7 +531,8 @@ def list_table(app, services, output_type):
                     [service['avg_uptime'] for service in services],
                     [service['cluster'] for service in services],
                     [service['region'] for service in services],
-                    [service['launch_type'] for service in services]
+                    [service['soft_memory'] for service in services],
+                    [service['hard_memory'] for service in services]
                 ],
                 fill=dict(
                     color=[
@@ -547,12 +552,14 @@ def list_table(app, services, output_type):
                         '#F5F4F4',
                         '#F5F4F4',
                         '#F5F4F4',
+                        '#F5F4F4',
                         '#F5F4F4'
                     ]
                 ),
                 align=[
                     'center',
                     'left',
+                    'center',
                     'center',
                     'center',
                     'center',

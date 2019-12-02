@@ -263,6 +263,13 @@ def service_dictionary(app, aws_region, aws_session, namespace):
 
             if namespace == 'list':
 
+                try:
+                    service['soft_memory'] = ecs_task_description['taskDefinition']['containerDefinitions'][0]['memoryReservation']
+                    service['hard_memory'] = ecs_task_description['taskDefinition']['containerDefinitions'][0]['memory']
+                except Exception:
+                    service['soft_memory'] = "unknown"
+                    service['hard_memory'] = "unknown"
+
                 # GET ALL TASKS UPTIME
                 ecs_uptime_list = get_uptime(
                     app,
